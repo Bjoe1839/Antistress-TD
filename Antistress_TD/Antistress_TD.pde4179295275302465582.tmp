@@ -13,14 +13,15 @@ void draw() {
   background(255);
 
   fill(200);
-  rect(-1, height*0.85, width, height);
+  rect(0, 960, width, height);
 
   //towerButtons
   boolean hovering = false;
-  for (TowerButton t : towerButtons) if (t.collision()) {
-    hovering = true;
+  for (TowerButton t : towerButtons) { //todo: skal være for alle tårne
+    if (t.collision()) {
+      hovering = true;
+    }
   }
-  
   if (hovering || draggingStatus > 0) cursor(HAND);
   else cursor(ARROW);
 
