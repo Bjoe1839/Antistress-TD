@@ -11,8 +11,7 @@ void setup() {
 void draw() {
   background(255);
 
-  fill(200);
-  rect(0, height*0.85, width, height);
+  rect(0, height*0.85, width, height*0.85, width, height);
 
   //towerButtons
   boolean hovering = false;

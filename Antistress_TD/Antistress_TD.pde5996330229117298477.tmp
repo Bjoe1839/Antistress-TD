@@ -11,31 +11,20 @@ void setup() {
 void draw() {
   background(255);
 
-  fill(200);
-  rect(0, height*0.85, width, height);
+  line(0, height*0.85, width, height*0.85);
 
-  //towerButtons
   boolean hovering = false;
-  for (TowerButton t : towerButtons) { //todo: skal være for alle tårne
-    if (t.collision()) {
-      hovering = true;
-      t.display(1);
-    } else {
-      t.display(0);
-    }
-  }
   for (TowerButton t : towerButtons) {
-    if (t.dragging) {
-      t.display(2);
-      hovering = true;
-    }
+    if (t.collision() || t.dragging) hovering = true;
   }
   if (hovering) cursor(HAND);
   else cursor(ARROW);
+  for (int i = 0; i < towerButtons.length; i++) {
+    towerButtons[i].display();
+  }
 
-
-  //dragged tower
   for (TowerButton t : towerButtons) {
+    println(t.towerNum+" "+t.dragging);
     if (t.dragging) {
       draggedTower = new Tower(mouseX, mouseY, t.towerNum);
       draggedTower.display();

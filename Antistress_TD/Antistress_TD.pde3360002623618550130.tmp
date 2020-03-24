@@ -1,0 +1,46 @@
+TowerButton[] towerButtons = new TowerButton[5];
+Tower draggedTower;
+
+void setup() {
+  fullScreen();
+  rectMode(CORNERS);
+
+  startUp();
+}
+
+void draw() {
+  background(255);
+
+  line(0, height*0.85, width, height*0.85);
+
+  if (towerButtons[0].collision() || towerButtons[0].dragging) cursor(HAND);
+  else cursor(ARROW);
+  for (int i = 0; i < towerButtons.length; i++) {
+    towerButtons[i].display();
+  }
+
+  for (TowerButton t : towerButtons) {
+    if (t.collision()) {
+      draggedTower = new Tower(mouseX, mouseY, t.towerNum);
+      draggedTower.display();
+    }
+  }
+}
+
+void mousePressed() {
+  for (TowerButton t : towerButtons) {
+    t.dragging = true;
+  }
+}
+
+void mouseReleased() {
+  for (TowerButton t : towerButtons) {
+    t.dragging = false;
+  }
+}
+
+void startUp() {
+  for (int i = 0; i < towerButtons.length; i++) {
+    towerButtons[i] = new TowerButton(int(width*0.13) + i*int(width*0.13), int(height*0.87), int(width*0.20) + i*int(width*0.13), int(height*0.93), "test123", 1);
+  }
+}

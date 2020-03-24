@@ -1,0 +1,24 @@
+DragButton test;
+Tower draggedTower;
+
+void setup() {
+  fullScreen();
+  rectMode(CORNERS);
+  test = new DragButton(50, 50, 250, 150, "test123");
+}
+
+void draw() {
+  if (test.collision()) cursor(HAND);
+  else cursor(ARROW);
+  test.display();
+  
+  if (test.dragging) {
+    draggedTower = new 
+  }
+}
+
+void mousePressed() {
+  if (test.collision()) {
+    test.dragging = true;
+  }
+}

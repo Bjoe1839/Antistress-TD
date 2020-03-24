@@ -1,0 +1,11 @@
+Button test;
+
+void setup() {
+  fullScreen();
+  rectMode(CORNERS);
+  test = new DragButton(50, 50, 250, 150, "test123");
+}
+
+void draw() {
+  test.display();
+}
