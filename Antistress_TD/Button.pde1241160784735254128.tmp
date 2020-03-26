@@ -30,17 +30,15 @@ class DragButton extends Button {
     //hvis den er trykket ned, skal den tegnes anderledes
     if (status < 2) {
       fill(50);
-      rect(x1+2, y1+6, x2+2, y2+6, 10);
-
+      rect(x1+5, y1+5, x2+5, y1+5, 10);
+      
       if (status == 0) fill(255);
       else fill(240);
       rect(x1, y1, x2, y2, 10);
-    } else {
-      fill(50);
-      rect(x1+2, y1+6, x2+2, y2+6, 10);
-
-      fill(240);
-      rect(x1+1, y1+3, x2+1, y2+3, 10);
+    }
+    else {
+      fill(200),
+      rect(x1, y1, x2, y2, 10);
     }
 
     fill(0);
@@ -57,7 +55,7 @@ class DragButton extends Button {
 
 
 class TowerButton extends DragButton {
-  int towerNum, price;
+  int towerNum;
 
   TowerButton(int x1, int y1, int x2, int y2, int towerNum_) {
     super(x1, y1, x2, y2);
@@ -68,23 +66,18 @@ class TowerButton extends DragButton {
     switch(towerNum) {
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
-      price = 100;
       break;
     case 2:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
-      price = 100;
       break;
     case 3:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: E";
-      price = 150;
       break;
     case 4:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: R";
-      price = 250;
       break;
     case 5:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: T";
-      price = 300;
       break;
     }
   }
@@ -97,16 +90,14 @@ class TowerButton extends DragButton {
 
     if (status == 2) {
       x++;
-      y+=3;
+      y++;
     }
 
     displayTower(x, y, towerNum, false, true);
 
-    if (money < price) fill(200, 0, 0);
-    else fill(0, 200, 0);
-    textSize(23);
-    
-    text(price+"$", x+35, y+9);
+    fill(0);
+    textSize(20);
+    text(100+"$", x+35, y+8);
     textSize(15);
   }
 }

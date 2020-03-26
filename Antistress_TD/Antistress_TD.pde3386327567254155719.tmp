@@ -1,6 +1,4 @@
 int draggingStatus;
-int money;
-
 TowerButton[] towerButtons = new TowerButton[5];
 FriendlyTower draggedTower;
 Square[][] squares = new Square[10][5];
@@ -8,9 +6,6 @@ Square[][] squares = new Square[10][5];
 void setup() {
   fullScreen();
   rectMode(CORNERS);
-
-  PFont font = createFont("Arial Bold", 20);
-  textFont(font);
 
   startUp();
 }
@@ -106,8 +101,6 @@ void keyPressed() {
 }
 
 void startUp() {
-  money = 200;
-  
   //placering af towerbuttons
   for (int i = 0; i < towerButtons.length; i++) {
     towerButtons[i] = new TowerButton(int(width*0.13) + i*int(width*0.13), int(height*0.87), int(width*0.20) + i*int(width*0.13), int(height*0.93), i+1);
@@ -119,8 +112,7 @@ void startUp() {
   }
 }
 
-
-void displayTower(int x, int y, int towerNum, boolean transparent, boolean smaller) { //todo: fix forskellige numre
+void displayTower(int x, int y, int towerNum, boolean transparent) { //todo: fix forskellige numre
   switch(towerNum) {
   case 1:
   case 6:
@@ -150,7 +142,6 @@ void displayTower(int x, int y, int towerNum, boolean transparent, boolean small
   }
   if (transparent) stroke(0, 50);
 
-  if (!smaller) circle(x, y, 80);
-  else circle(x, y, 50);
+  circle(x, y, 80);
   stroke(0);
 }

@@ -1,16 +1,11 @@
 int draggingStatus;
-int money;
-
 TowerButton[] towerButtons = new TowerButton[5];
-FriendlyTower draggedTower;
+Tower draggedTower;
 Square[][] squares = new Square[10][5];
 
 void setup() {
   fullScreen();
   rectMode(CORNERS);
-
-  PFont font = createFont("Arial Bold", 20);
-  textFont(font);
 
   startUp();
 }
@@ -47,8 +42,16 @@ void draw() {
 
   //dragged tower
   if (draggingStatus > 0) {
-    draggedTower = new FriendlyTower(mouseX, mouseY, draggingStatus, false);
+    draggedTower = new Tower(mouseX, mouseY, draggingStatus);
     draggedTower.display();
+  }
+}
+
+void mouseClicked() {
+  for (TowerButton t : towerButtons) {
+    if (t.collision()) {
+      draggingStatus = t.towerNum;
+    }
   }
 }
 
@@ -61,16 +64,8 @@ void mousePressed() {
 }
 
 void mouseReleased() {
-  if (draggingStatus > 0) {
-    for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
-      //hvis tårnet slippes over et felt, tilføjes tårnet til det felt 
-      if (squares[i][j].button.collision()) {
-        squares[i][j].addTower(draggingStatus);
-        break;
-      }
-    }
-    draggingStatus = 0;
-  }
+  //hvis der blev trukket før er der ikke mere
+  draggingStatus = 0;
 }
 
 void keyPressed() {
@@ -106,8 +101,6 @@ void keyPressed() {
 }
 
 void startUp() {
-  money = 200;
-  
   //placering af towerbuttons
   for (int i = 0; i < towerButtons.length; i++) {
     towerButtons[i] = new TowerButton(int(width*0.13) + i*int(width*0.13), int(height*0.87), int(width*0.20) + i*int(width*0.13), int(height*0.93), i+1);
@@ -119,8 +112,7 @@ void startUp() {
   }
 }
 
-
-void displayTower(int x, int y, int towerNum, boolean transparent, boolean smaller) { //todo: fix forskellige numre
+void displayTower(int x, int y, int towerNum, boolean transparent) {
   switch(towerNum) {
   case 1:
   case 6:
@@ -150,7 +142,6 @@ void displayTower(int x, int y, int towerNum, boolean transparent, boolean small
   }
   if (transparent) stroke(0, 50);
 
-  if (!smaller) circle(x, y, 80);
-  else circle(x, y, 50);
+  circle(x, y, 80);
   stroke(0);
 }
