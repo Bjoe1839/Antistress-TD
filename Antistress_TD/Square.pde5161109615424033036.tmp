@@ -1,9 +1,0 @@
-class Square {
-  Button button;
-  
-  Square() {
-    
-  }
-  
-  
-}

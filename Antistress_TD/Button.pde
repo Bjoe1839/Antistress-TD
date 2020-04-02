@@ -27,13 +27,14 @@ class DragButton extends Button {
 
   void display(int status) {
 
-    //hvis den er trykket ned, skal den tegnes anderledes
+    //status 0 er hvid, status 1 er grå og status 2 er trykket ned
     if (status < 2) {
       fill(50);
       rect(x1+2, y1+6, x2+2, y2+6, 10);
 
       if (status == 0) fill(255);
       else fill(240);
+
       rect(x1, y1, x2, y2, 10);
     } else {
       fill(50);
@@ -45,11 +46,12 @@ class DragButton extends Button {
 
     fill(0);
 
-    if (collision() && draggingStatus == 0) {
+    if (collision() && draggingStatus == -1) {
       fill(255, 200);
       int len = x2-x1;
       rect(mouseX-len, y1-220, mouseX+len, y1-10, 10);
       fill(0);
+      textSize(17);
       text(text, mouseX-len+5, y1-200);
     }
   }
@@ -58,33 +60,42 @@ class DragButton extends Button {
 
 class TowerButton extends DragButton {
   int towerNum, price;
+  FriendlyTower tower;
 
   TowerButton(int x1, int y1, int x2, int y2, int towerNum_) {
     super(x1, y1, x2, y2);
     towerNum = towerNum_;
 
-    //beskrivelsestekst
-    text = "Tårn "+towerNum+"\n";
+    //beskrivelsestekst, pris og tårne
+    text = "Tårn "+(towerNum+1)+"\n";
+    int x = int((x2-x1)*.3 + x1);
+    int y = int((y2+y1)*.5);
+    
     switch(towerNum) {
-    case 1:
+    case 0:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
+      tower = new Fighter(x, y, false, 50, 255, 0);
       break;
-    case 2:
+    case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
       price = 100;
+      tower = new Sniper(x, y, false, 50, 255, 0);
       break;
-    case 3:
+    case 2:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: E";
       price = 150;
+      tower = new Freezer(x, y, false, 50, 255, 0);
       break;
-    case 4:
+    case 3:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: R";
       price = 250;
+      tower = new Booster(x, y, false, 50, 255);
       break;
-    case 5:
+    case 4:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: T";
       price = 300;
+      tower = new Blaster(x, y, false, 50, 255, 0);
       break;
     }
   }
@@ -93,19 +104,17 @@ class TowerButton extends DragButton {
     super.display(status);
 
     int x = int((x2-x1)*.3 + x1);
-    int y = int((y2-y1)*.5 + y1);
+    int y = int((y2+y1)*.5);
 
     if (status == 2) {
-      x++;
-      y+=3;
+      tower.display(true);
     }
-
-    displayTower(x, y, towerNum, false, true);
+    else tower.display(false);
 
     if (money < price) fill(200, 0, 0);
     else fill(0, 200, 0);
     textSize(23);
-    
+
     text(price+"$", x+35, y+9);
     textSize(15);
   }
