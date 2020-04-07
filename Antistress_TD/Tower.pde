@@ -25,8 +25,8 @@ class Tower {
 
 
 class FriendlyTower extends Tower {
-  int size, alfa, towerNum;
-  boolean placed;
+  int size, alfa, towerNum, worth, upgradePrice;
+  boolean placed, upgraded;
 
   FriendlyTower(int x, int y, boolean placed_, int size_, int alfa_, int towerNum_) {
     super(x, y);
@@ -41,19 +41,24 @@ class FriendlyTower extends Tower {
 
     switch(towerNum) {
     case 0:
-      fill(255, 0, 0, alfa);
+      if (!upgraded) fill(255, 0, 0, alfa);
+      else fill(200, 0, 0, alfa);
       break;
     case 1:
-      fill(0, 255, 0, alfa);
+      if (!upgraded) fill(0, 255, 0, alfa);
+      else fill(0, 200, 0, alfa);
       break;
     case 2:
-      fill(0, 0, 255, alfa);
+      if (!upgraded) fill(0, 0, 255, alfa);
+      else fill(0, 0, 200, alfa);
       break;
     case 3:
-      fill(255, 255, 0, alfa);
+      if (!upgraded) fill(255, 255, 0, alfa);
+      else fill(200, 200, 0, alfa);
       break;
     case 4:
-      fill(0, alfa);
+      if (!upgraded) fill(0, alfa);
+      else fill(100, alfa);
       break;
     }
 
@@ -68,6 +73,12 @@ class FriendlyTower extends Tower {
   }
 
   void activate() {
+  }
+
+  void upgrade() {
+  }
+
+  void setStats(int boostingStatus) {
   }
 }
 
@@ -85,7 +96,7 @@ class ShooterTower extends FriendlyTower {
 
   boolean shouldShoot() {
     shotCooldown--;
-    
+
     boolean inRange = false;
     for (OpponentTower opponent : opponentTowers) {
       if (opponent.laneNum == laneNum && opponent.x-x < range*(width/squares.length-1)) {
@@ -100,6 +111,22 @@ class ShooterTower extends FriendlyTower {
     }
     return false;
   }
+
+  void setStats(int boostingStatus) {
+    //hvis tårnet er boostet med en almindelig booster
+    if (boostingStatus == 1) {
+      shotSpeed *= .9;
+      damage *= 1.1;
+      if (range < 9) range++;
+
+      //hvis tårnet er boostet med en opgraderet booster
+    } else if (boostingStatus == 2) {
+      shotSpeed *= .85;
+      damage *= 1.15;
+      range += 2;
+      if (range > 9) range = 9;
+    }
+  }
 }
 
 
@@ -108,13 +135,11 @@ class ShooterTower extends FriendlyTower {
 
 
 class Fighter extends ShooterTower {
-  Fighter(int x, int y, boolean placed, int size, int alfa, int laneNum) {
+  Fighter(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 0, laneNum);
-    maxHealth = 100;
+    setStats(boostingStatus);
     health = maxHealth;
-    shotSpeed = 120;
-    damage = 15;
-    range = 2;
+    upgradePrice = 100;
   }
 
   void activate() {
@@ -122,17 +147,33 @@ class Fighter extends ShooterTower {
       projectiles.add(new FighterProjectile(x+30, y, damage, laneNum, range));
     }
   }
+
+
+  void setStats(int boostingStatus) {
+    if (!upgraded) {
+      worth = 60;
+      maxHealth = 100;
+      shotSpeed = 120;
+      damage = 15;
+      range = 2;
+    } else {
+      worth = 100;
+      //maxHealth = 150; todo: fixx
+      shotSpeed = 60;
+      damage = 20;
+    }
+
+    super.setStats(boostingStatus);
+  }
 }
 
 
 class Sniper extends ShooterTower {
-  Sniper(int x, int y, boolean placed, int size, int alfa, int laneNum) {
+  Sniper(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 1, laneNum);
-    maxHealth = 150;
+    setStats(boostingStatus);
     health = maxHealth;
-    shotSpeed = 45;
-    damage = 3;
-    range = 9;
+    upgradePrice = 150;
   }
 
   void activate() {
@@ -140,35 +181,64 @@ class Sniper extends ShooterTower {
       projectiles.add(new SniperProjectile(x+30, y, damage, laneNum, range));
     }
   }
+
+  void setStats(int boostingStatus) {
+    if (!upgraded) {
+      worth = 60;
+      maxHealth = 150;
+      shotSpeed = 45;
+      damage = 3;
+      range = 9;
+    } else {
+      //add
+    }
+
+    super.setStats(boostingStatus);
+  }
 }
 
 
 class Freezer extends ShooterTower {
-  Freezer(int x, int y, boolean placed, int size, int alfa, int laneNum) {
+  int freezeTime;
+
+  Freezer(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 2, laneNum);
-    maxHealth = 200;
+    setStats(boostingStatus);
     health = maxHealth;
-    shotSpeed = 240;
-    damage = 0;
-    range = 4;
+    upgradePrice = 150;
   }
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new FreezerProjectile(x+30, y, damage, laneNum, range));
+      projectiles.add(new FreezerProjectile(x+30, y, damage, laneNum, range, freezeTime));
     }
+  }
+
+  void setStats(int boostingStatus) {
+    if (!upgraded) {
+      worth = 100;
+      maxHealth = 200;
+      shotSpeed = 240;
+      damage = 0;
+      range = 4;
+      freezeTime = 60;
+    } else {
+      freezeTime = 120;
+      //add
+    }
+
+    super.setStats(boostingStatus);
   }
 }
 
 
+
 class Blaster extends ShooterTower {
-  Blaster(int x, int y, boolean placed, int size, int alfa, int laneNum) {
+  Blaster(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 4, laneNum);
-    maxHealth = 300;
+    setStats(boostingStatus);
     health = maxHealth;
-    shotSpeed = 300;
-    damage = 20;
-    range = 4;
+    upgradePrice = 250;
   }
 
   void activate() {
@@ -176,17 +246,41 @@ class Blaster extends ShooterTower {
       projectiles.add(new BlasterProjectile(x+30, y, damage, laneNum, range));
     }
   }
+
+  void setStats(int boostingStatus) {
+    if (!upgraded) {
+      worth = 150;
+      maxHealth = 300;
+      shotSpeed = 300;
+      damage = 20;
+      range = 4;
+    } else {
+      //add
+    }
+
+    super.setStats(boostingStatus);
+  }
 }
 
 
 class Booster extends FriendlyTower {
   Booster(int x, int y, boolean placed, int size, int alfa) {
     super(x, y, placed, size, alfa, 3);
-    maxHealth = 200;
+    setStats();
     health = maxHealth;
+    upgradePrice = 200;
   }
 
   void activate() {
+  }
+
+  void setStats() {
+    if (!upgraded) {
+      worth = 200;
+      maxHealth = 200;
+    } else {
+      //add
+    }
   }
 }
 
@@ -196,6 +290,8 @@ class Booster extends FriendlyTower {
 class OpponentTower extends Tower {
   int laneNum;
   int speed, damage, damageSpeed, damageCooldown, worth;
+  int freezeCooldown;
+
 
   OpponentTower(int x, int y, int laneNum_) {
     super(x, y);
@@ -210,7 +306,6 @@ class OpponentTower extends Tower {
 
   void move() {
 
-    damageCooldown--;
     boolean collision = false;
     //tjekker kun for kollision for tårne på egen lane
     for (int i = 0; i < squares.length; i++) {
@@ -219,18 +314,26 @@ class OpponentTower extends Tower {
         if (damageCooldown <= 0) {
           damageCooldown = damageSpeed;
           squares[i][laneNum].tower.health -= damage;
-        }
+        } else if (freezeCooldown <= 0) {
+          damageCooldown--;
+        } else if (frameCount%2 == 0) damageCooldown--;
       }
     }
 
+    if (freezeCooldown > 0) freezeCooldown--;
+
     if (!collision) {
-      if (frameCount%2 == 0) x -= speed;
+      if (freezeCooldown > 0) {
+        if (frameCount%4 == 0) x--;
+      } else if (frameCount%2 == 0) x--;
+
       if (x < -40) gameOver = true;
     }
   }
 
   void display() {
-    fill(0);
+    if (freezeCooldown <= 0) fill(0);
+    else fill(0, 0, 200);
     rect(x-40, y-40, x+40, y+40);
 
     displayHealth();

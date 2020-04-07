@@ -13,7 +13,10 @@ class Button {
     return false;
   }
 
-  void display() {
+  void display(String text) {
+    rect(x1, y1, x2, y2, 5);
+    fill(0);
+    text(text, (x1+x2)*.5, (y1+y2)*.5);
   }
 }
 
@@ -46,13 +49,14 @@ class DragButton extends Button {
 
     fill(0);
 
-    if (collision() && draggingStatus == -1) {
+    //beskrivelses boks
+    if (status == 1) {
       fill(255, 200);
       int len = x2-x1;
       rect(mouseX-len, y1-220, mouseX+len, y1-10, 10);
       fill(0);
       textSize(17);
-      text(text, mouseX-len+5, y1-200);
+      text(text, mouseX-len+7, y1-200);
     }
   }
 }
@@ -75,17 +79,17 @@ class TowerButton extends DragButton {
     case 0:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
-      tower = new Fighter(x, y, false, 50, 255, 0);
+      tower = new Fighter(x, y, false, 50, 255, 0, 0);
       break;
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
       price = 100;
-      tower = new Sniper(x, y, false, 50, 255, 0);
+      tower = new Sniper(x, y, false, 50, 255, 0, 0);
       break;
     case 2:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: E";
       price = 150;
-      tower = new Freezer(x, y, false, 50, 255, 0);
+      tower = new Freezer(x, y, false, 50, 255, 0, 0);
       break;
     case 3:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: R";
@@ -95,7 +99,7 @@ class TowerButton extends DragButton {
     case 4:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: T";
       price = 300;
-      tower = new Blaster(x, y, false, 50, 255, 0);
+      tower = new Blaster(x, y, false, 50, 255, 0, 0);
       break;
     }
   }
@@ -105,8 +109,11 @@ class TowerButton extends DragButton {
 
     int x = int((x2-x1)*.3 + x1);
     int y = int((y2+y1)*.5);
+    
 
     if (status == 2) {
+      x++;
+      y+=3;
       tower.display(true);
     }
     else tower.display(false);

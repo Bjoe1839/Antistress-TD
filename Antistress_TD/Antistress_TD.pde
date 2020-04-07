@@ -1,5 +1,6 @@
 //todo:
 
+//projektil position
 //tjek ikke enhanced for-loops
 //fix generelle enheder og enheder angivet i pixels 
 
@@ -12,12 +13,13 @@ ArrayList<OpponentTower> opponentTowers = new ArrayList<OpponentTower>();
 ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 TowerButton[] towerButtons = new TowerButton[5];
 Square[][] squares = new Square[10][5];
+UpgradeMenu upgradeMenu;
 
 void setup() {
-  fullScreen(P2D);
+  fullScreen();
   rectMode(CORNERS);
 
-  PFont font = createFont("Arial Bold", 20);
+  PFont font = createFont("Arial Bold", 17);
   textFont(font);
 
   startUp();
@@ -32,19 +34,14 @@ void draw() {
     for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
       fill(255);
       squares[i][j].activateTower();
-      squares[i][j].display(j);
+      squares[i][j].display();
     }
 
     opponentHandler();
     projectileHandler();
 
     //musens markør
-    boolean hovering = false;
-    for (TowerButton t : towerButtons) if (t.collision() && money >= t.price) {
-      hovering = true;
-    }
-
-    if (hovering || draggingStatus > -1) cursor(HAND);
+    if (hovering()) cursor(HAND);
     else cursor(ARROW);
 
 
@@ -52,11 +49,16 @@ void draw() {
     for (TowerButton tb : towerButtons) {
       if (draggingStatus == tb.towerNum) {
         tb.display(2);
-      } else if (tb.collision() && draggingStatus == -1 && money >= tb.price) {
+      } else if (tb.collision() && draggingStatus == -1 && money >= tb.price && upgradeMenu == null) {
         tb.display(1);
       } else {
         tb.display(0);
       }
+    }
+
+    //upgraderingsmenu
+    if (upgradeMenu != null) {
+      upgradeMenu.display();
     }
 
 
@@ -85,19 +87,30 @@ void draw() {
 
 
 void mousePressed() {
-  for (TowerButton t : towerButtons) {
-    if (t.collision() && money >= t.price) {
-      draggingStatus = t.towerNum;
+  if (upgradeMenu == null) {
+    for (TowerButton tb : towerButtons) {
+      if (tb.collision() && money >= tb.price) {
+        draggingStatus = tb.towerNum;
+      }
     }
+    for (Square[] squareRow : squares) for (Square square : squareRow) {
+      if (square.button.collision() && square.tower != null) {
+        upgradeMenu = new UpgradeMenu(square);
+        break;
+      }
+    }
+  } else {
+    upgradeMenu.pressed();
   }
 }
+
 
 void mouseReleased() {
   if (draggingStatus > -1) {
     for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
       //hvis tårnet slippes over et felt, tilføjes tårnet til det felt 
       if (squares[i][j].button.collision() && squares[i][j].tower == null) {
-        squares[i][j].addTower(j);
+        squares[i][j].addTower();
         money -= towerButtons[draggingStatus%5].price;
         break;
       }
@@ -105,6 +118,7 @@ void mouseReleased() {
     draggingStatus = -1;
   }
 }
+
 
 void keyPressed() {
   switch(key) {
@@ -161,7 +175,7 @@ void startUp() {
   //placering af hvert felt
   for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
     //-1 fordi der ellers ville være en kant med i venstre side og i toppen
-    squares[i][j] = new Square(i*width/squares.length-1, int(j*height*0.85/squares[0].length)-1, (i+1)*width/squares.length-1, int((j+1)*height*0.85/squares[0].length)-1);
+    squares[i][j] = new Square(i*width/squares.length-1, int(j*height*0.85/squares[0].length)-1, (i+1)*width/squares.length-1, int((j+1)*height*0.85/squares[0].length)-1, i, j);
   }
 }
 
@@ -187,4 +201,23 @@ void projectileHandler() {
     boolean removed = projectiles.get(i).move();
     if (!removed) projectiles.get(i).display();
   }
+}
+
+//om musen holder over en knap og skal markeres med en hånd i stedet for en pil
+boolean hovering() {
+  if (draggingStatus > -1) return true;
+
+  if (upgradeMenu == null) {
+    for (TowerButton tb : towerButtons) if (tb.collision() && money >= tb.price) {
+      return true;
+    }
+    for (Square[] squareRow : squares) for (Square square : squareRow) {
+      if (square.button.collision() && square.tower != null) {
+        return true;
+      }
+    }
+  } else if (upgradeMenu.sellButton.collision() || upgradeMenu.exitButton.collision() || upgradeMenu.upgradeButton != null && upgradeMenu.upgradeButton.collision()) {
+    return true;
+  }
+  return false;
 }
