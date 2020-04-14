@@ -55,8 +55,8 @@ class DragButton extends Button {
       if (status == 1) fill(255, 200);
       else fill(255, 200, 200, 200); //hvis man ikke har råd til det farves feltet rødt
       
-      int len = 130;
       
+      int len = int(width * 0.07);
       rect(mouseX-len, y1-220, mouseX+len, y1-10, 15);
       fill(0);
       textFont(normalFont);
@@ -84,7 +84,7 @@ class TowerButton extends DragButton {
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
       towerImg = fighterSprite[0].copy();
-      towerImg.resize(100, 0);
+      towerImg.resize(int(0.055 * width), 0);
       break;
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
