@@ -44,7 +44,7 @@ class UpgradeMenu {
     fill(200);
     rect(x, y, x+250, y+200, 10);
 
-    textSize(17);
+    textFont(normalFont);
     fill(0);
     text(text, x+7, y+22);
 
@@ -52,7 +52,7 @@ class UpgradeMenu {
 
     if (upgradeButton != null) {
       fill(0, 255, 0);
-      upgradeButton.display("↑");
+      upgradeButton.display("up");
     }
 
     fill(255, 0, 0);

@@ -68,13 +68,14 @@ class SniperProjectile extends Projectile {
 
 class FreezerProjectile extends Projectile {
   //roterende snefnug/snebolde
-  int freezeTime;
-  FreezerProjectile(int x, int y, int damage_, int laneNum, int range, int freezeTime_) {
+  int slowDur, freezeDur;
+  FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_) {
     super(x, y, laneNum, range);
     speed = 4;
-    damage = damage_;
+    damage = 0;
     size = 10;
-    freezeTime = freezeTime_;
+    slowDur = slowDur_;
+    freezeDur = freezeDur_;
   }
 
   void display() {
@@ -85,7 +86,8 @@ class FreezerProjectile extends Projectile {
   }
 
   void hitOpponent(OpponentTower opponent) {
-    opponent.freezeCooldown += freezeTime;
+    opponent.slowCooldown += slowDur;
+    opponent.freezeCooldown += freezeDur;
   }
 }
 

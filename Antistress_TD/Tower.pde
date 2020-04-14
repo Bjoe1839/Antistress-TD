@@ -80,6 +80,9 @@ class FriendlyTower extends Tower {
 
   void setStats(int boostingStatus) {
   }
+
+  void ability() {
+  }
 }
 
 
@@ -97,17 +100,18 @@ class ShooterTower extends FriendlyTower {
   boolean shouldShoot() {
     shotCooldown--;
 
-    boolean inRange = false;
-    for (OpponentTower opponent : opponentTowers) {
-      if (opponent.laneNum == laneNum && opponent.x-x < range*(width/squares.length-1)) {
-        inRange = true;
-        break;
-      }
-    }
-
-    if (inRange && shotCooldown <= 0) {
+    if (inRange() && shotCooldown <= 0) {
       shotCooldown = shotSpeed;
       return true;
+    }
+    return false;
+  }
+
+  boolean inRange() {
+    for (OpponentTower opponent : opponentTowers) {
+      if (opponent.laneNum == laneNum && opponent.x-x < range*(width/squares.length-1)) {
+        return true;
+      }
     }
     return false;
   }
@@ -135,19 +139,30 @@ class ShooterTower extends FriendlyTower {
 
 
 class Fighter extends ShooterTower {
+  int abilityCooldown, abilityShotSpeed;
+  
   Fighter(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 0, laneNum);
     setStats(boostingStatus);
     health = maxHealth;
     upgradePrice = 100;
+    abilityShotSpeed = int(shotSpeed * .33);
   }
 
   void activate() {
-    if (shouldShoot()) {
+
+    //hvis cooldown ability er aktiveret
+    if (abilityCooldown > 0) {
+      shotCooldown--;
+      abilityCooldown--;
+      if (inRange() && shotCooldown <= shotSpeed-abilityShotSpeed) {
+        shotCooldown = shotSpeed;
+        projectiles.add(new FighterProjectile(x+30, y, damage, laneNum, range));
+      }
+    } else if (shouldShoot()) {
       projectiles.add(new FighterProjectile(x+30, y, damage, laneNum, range));
     }
   }
-
 
   void setStats(int boostingStatus) {
     if (!upgraded) {
@@ -158,17 +173,26 @@ class Fighter extends ShooterTower {
       range = 2;
     } else {
       worth = 100;
-      //maxHealth = 150; todo: fixx
       shotSpeed = 60;
       damage = 20;
-    }
 
+      //skal have samme procentvise liv som før
+      int temp = maxHealth;
+      maxHealth = 150;
+      health = int(map(health, 0, temp, 0, maxHealth));
+    }
     super.setStats(boostingStatus);
+  }
+
+  void ability() {
+    abilityCooldown = 300;
   }
 }
 
 
 class Sniper extends ShooterTower {
+  int abilityCooldown;
+  
   Sniper(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 1, laneNum);
     setStats(boostingStatus);
@@ -177,7 +201,10 @@ class Sniper extends ShooterTower {
   }
 
   void activate() {
-    if (shouldShoot()) {
+    if (abilityCooldown > 0) {
+      if (frameCount%2 == 0) projectiles.add(new SniperProjectile(x+30, y, damage, laneNum, range));
+      abilityCooldown--;
+    } else if (shouldShoot()) {
       projectiles.add(new SniperProjectile(x+30, y, damage, laneNum, range));
     }
   }
@@ -192,14 +219,17 @@ class Sniper extends ShooterTower {
     } else {
       //add
     }
-
     super.setStats(boostingStatus);
+  }
+  
+  void ability() {
+    abilityCooldown = 60;
   }
 }
 
 
 class Freezer extends ShooterTower {
-  int freezeTime;
+  int slowDur, freezeDur;
 
   Freezer(int x, int y, boolean placed, int size, int alfa, int boostingStatus, int laneNum) {
     super(x, y, placed, size, alfa, 2, laneNum);
@@ -210,7 +240,7 @@ class Freezer extends ShooterTower {
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new FreezerProjectile(x+30, y, damage, laneNum, range, freezeTime));
+      projectiles.add(new FreezerProjectile(x+30, y, laneNum, range, slowDur, freezeDur));
     }
   }
 
@@ -221,13 +251,21 @@ class Freezer extends ShooterTower {
       shotSpeed = 240;
       damage = 0;
       range = 4;
-      freezeTime = 60;
+      slowDur = 60;
+      freezeDur = 0;
     } else {
-      freezeTime = 120;
+      slowDur = 90;
+      freezeDur = 60;
       //add
     }
-
     super.setStats(boostingStatus);
+  }
+  
+  void ability() {
+    for (OpponentTower opponent : opponentTowers) {
+      opponent.freezeCooldown += 120;
+      opponent.slowCooldown += 120;
+    }
   }
 }
 
@@ -257,7 +295,6 @@ class Blaster extends ShooterTower {
     } else {
       //add
     }
-
     super.setStats(boostingStatus);
   }
 }
@@ -290,7 +327,7 @@ class Booster extends FriendlyTower {
 class OpponentTower extends Tower {
   int laneNum;
   int speed, damage, damageSpeed, damageCooldown, worth;
-  int freezeCooldown;
+  int slowCooldown, freezeCooldown;
 
 
   OpponentTower(int x, int y, int laneNum_) {
@@ -305,25 +342,29 @@ class OpponentTower extends Tower {
   }
 
   void move() {
-
     boolean collision = false;
     //tjekker kun for kollision for tårne på egen lane
-    for (int i = 0; i < squares.length; i++) {
-      if (squares[i][laneNum].tower != null && squares[i][laneNum].tower.x+40 >= x-40 && squares[i][laneNum].tower.x-40 <= x+40) {
-        collision = true;
-        if (damageCooldown <= 0) {
-          damageCooldown = damageSpeed;
-          squares[i][laneNum].tower.health -= damage;
-        } else if (freezeCooldown <= 0) {
-          damageCooldown--;
-        } else if (frameCount%2 == 0) damageCooldown--;
+
+    if (freezeCooldown == 0) {
+      for (int i = 0; i < squares.length; i++) {
+        if (squares[i][laneNum].tower != null && squares[i][laneNum].tower.x+40 >= x-40 && squares[i][laneNum].tower.x-40 <= x+40) {
+          collision = true;
+          if (damageCooldown <= 0) {
+            damageCooldown = damageSpeed;
+            squares[i][laneNum].tower.health -= damage;
+          } else if (slowCooldown == 0) {
+            damageCooldown--;
+          } else if (frameCount%2 == 0) damageCooldown--;
+        }
       }
+    } else {
+      freezeCooldown--;
     }
 
-    if (freezeCooldown > 0) freezeCooldown--;
+    if (slowCooldown > 0 && freezeCooldown == 0) slowCooldown--;
 
-    if (!collision) {
-      if (freezeCooldown > 0) {
+    if (!collision && freezeCooldown == 0) {
+      if (slowCooldown > 0) {
         if (frameCount%4 == 0) x--;
       } else if (frameCount%2 == 0) x--;
 
@@ -332,8 +373,10 @@ class OpponentTower extends Tower {
   }
 
   void display() {
-    if (freezeCooldown <= 0) fill(0);
-    else fill(0, 0, 200);
+    if (freezeCooldown > 0) fill(0, 0, 200);
+    else if (slowCooldown > 0) fill(0, 0, 150);
+    else fill(0);
+
     rect(x-40, y-40, x+40, y+40);
 
     displayHealth();
