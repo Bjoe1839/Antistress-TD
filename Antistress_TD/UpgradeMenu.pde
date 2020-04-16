@@ -77,35 +77,7 @@ class UpgradeMenu {
       money += square.tower.worth;
       //hvis man sælger en booster skal de boostede felter opdateres
       if (square.tower.towerNum == 3) {
-        for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
-          int col = square.colNum + i;
-          int row = square.rowNum + j;
-          if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
-
-            if (squares[col][row].boostingStatus > 0) {
-              //der tjekkes om der er en booster i rækkevidde, ellers slettes booststatusen
-              squares[col][row].boostingStatus = 0;
-
-              for (int k = -1; k < 2; k++) for (int l = -1; l < 2; l++) {
-                int col2 = squares[col][row].colNum + k;
-                int row2 = squares[col][row].rowNum + l;
-
-                if (col2 >= 0 && row2 >= 0 && col2 < squares.length && row2 < squares[0].length && squares[col2][row2] != square) {
-
-                  if (squares[col2][row2].tower != null && squares[col2][row2].tower.towerNum == 3) {
-                    if (squares[col2][row2].tower.upgraded) squares[col][row].boostingStatus = 2;
-                    else if (squares[col][row].boostingStatus < 2) {
-                      squares[col][row].boostingStatus = 1;
-                    }
-                  }
-                }
-              }
-              if (squares[col][row].tower != null) {
-                squares[col][row].tower.setStats(squares[col][row].boostingStatus);
-              }
-            }
-          }
-        }
+        square.updateBoost();
       }
       upgradeMenu.square.tower = null;
       upgradeMenu = null;

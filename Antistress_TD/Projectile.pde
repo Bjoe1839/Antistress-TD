@@ -19,7 +19,7 @@ class Projectile {
     }
 
     for (int i = opponentTowers.size()-1; i >= 0; i--) {
-      if (opponentTowers.get(i).laneNum == laneNum && opponentTowers.get(i).x + 40 >= x - size/2 && opponentTowers.get(i).x - 40 <= x + size/2) {
+      if (opponentTowers.get(i).laneNum == laneNum && opponentTowers.get(i).x - opponentTowers.get(i).xOffset + opponentTowers.get(i).wid >= x - size/2 && opponentTowers.get(i).x - opponentTowers.get(i).xOffset <= x + size/2) {
 
         hitOpponent(opponentTowers.get(i));
 

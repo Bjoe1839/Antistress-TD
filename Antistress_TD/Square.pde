@@ -29,9 +29,12 @@ class Square {
 
     if (tower != null) {
       if (tower.health > 0) {
-        tower.display(false);
+        tower.display();
       } else {
         if (upgradeMenu != null && upgradeMenu.square == this) upgradeMenu = null;
+        if (tower.towerNum == 3) {
+          updateBoost();
+        }
         tower = null;
       }
     } else if (towerDragStatus > -1 && button.collision()) {
@@ -39,28 +42,37 @@ class Square {
       int x = int((x2+x1)*.5);
       int y = int((y2+y1)*.5);
 
-      FriendlyTower transparentTower;
       switch(towerDragStatus%5) {
       case 0:
-        transparentTower = new Fighter(x, y, false, 80, 50, boostingStatus, rowNum);
+        tint(255, 50);
+        image(fighterSprite[0], x, y);
+        noTint();
         break;
       case 1:
-        transparentTower = new Sniper(x, y, false, 80, 50, boostingStatus, rowNum);
+        fill(0, 255, 0, 50);
+        stroke(0, 50);
+        circle(x, y, 80);
+        stroke(0);
         break;
       case 2:
-        transparentTower = new Freezer(x, y, false, 80, 50, boostingStatus, rowNum);
+        fill(0, 0, 255, 50);
+        stroke(0, 50);
+        circle(x, y, 80);
+        stroke(0);
         break;
       case 3:
-        transparentTower = new Booster(x, y, false, 80, 50);
+        fill(255, 255, 0, 50);
+        stroke(0, 50);
+        circle(x, y, 80);
+        stroke(0);
         break;
       case 4:
-        transparentTower = new Blaster(x, y, false, 80, 50, boostingStatus, rowNum);
-        break;
-      default:
-        transparentTower = new Sniper(x, y, false, 80, 50, boostingStatus, rowNum);
+        fill(0, 50);
+        stroke(0, 50);
+        circle(x, y, 80);
+        stroke(0);
         break;
       }
-      transparentTower.display(false);
     }
   }
 
@@ -70,16 +82,16 @@ class Square {
 
     switch(towerDragStatus%5) {
     case 0:
-      tower = new Fighter(x, y, true, 80, 255, boostingStatus, rowNum);
+      tower = new Fighter(x, y, true, boostingStatus, rowNum);
       break;
     case 1:
-      tower = new Sniper(x, y, true, 80, 255, boostingStatus, rowNum);
+      tower = new Sniper(x, y, true, boostingStatus, rowNum);
       break;
     case 2:
-      tower = new Freezer(x, y, true, 80, 255, boostingStatus, rowNum);
+      tower = new Freezer(x, y, true, boostingStatus, rowNum);
       break;
     case 3:
-      tower = new Booster(x, y, true, 80, 255);
+      tower = new Booster(x, y, true);
       for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
         int col = colNum + i;
         int row = rowNum + j;
@@ -95,7 +107,7 @@ class Square {
       }
       break;
     case 4:
-      tower = new Blaster(x, y, true, 80, 255, boostingStatus, rowNum);
+      tower = new Blaster(x, y, true, boostingStatus, rowNum);
       break;
     }
   }
@@ -108,5 +120,37 @@ class Square {
   void lighten() {
     fill(255, 150);
     rect(x1, y1, x2, y2);
+  }
+
+  void updateBoost() {
+    for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
+      int col = colNum + i;
+      int row = rowNum + j;
+      if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
+
+        if (squares[col][row].boostingStatus > 0) {
+          //der tjekkes om der er en booster i rækkevidde, ellers slettes booststatusen
+          squares[col][row].boostingStatus = 0;
+
+          for (int k = -1; k < 2; k++) for (int l = -1; l < 2; l++) {
+            int col2 = squares[col][row].colNum + k;
+            int row2 = squares[col][row].rowNum + l;
+
+            if (col2 >= 0 && row2 >= 0 && col2 < squares.length && row2 < squares[0].length && !(col2 == colNum && row2 == rowNum)) {
+
+              if (squares[col2][row2].tower != null && squares[col2][row2].tower.towerNum == 3) {
+                if (squares[col2][row2].tower.upgraded) squares[col][row].boostingStatus = 2;
+                else if (squares[col][row].boostingStatus < 2) {
+                  squares[col][row].boostingStatus = 1;
+                }
+              }
+            }
+          }
+          if (squares[col][row].tower != null) {
+            squares[col][row].tower.setStats(squares[col][row].boostingStatus);
+          }
+        }
+      }
+    }
   }
 }
