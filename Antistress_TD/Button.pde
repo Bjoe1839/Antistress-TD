@@ -84,7 +84,7 @@ class TowerButton extends DragButton {
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
       towerImg = fighterSprite[0].copy();
-      towerImg.resize(int(0.055 * width), 0);
+      towerImg.resize(0, int(resizeFactor * towerImg.height * .57));
       break;
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";

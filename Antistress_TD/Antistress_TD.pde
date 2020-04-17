@@ -24,16 +24,19 @@ UpgradeMenu upgradeMenu;
 void setup() {
   //size(1600, 900);
   fullScreen(P2D);
+  
+  arrowCursor = loadImage("cursor-arrow.png");
+  cursor(arrowCursor, 0, 0);
+  
   text("Loading...", 200, 200);
   rectMode(CORNERS);
   imageMode(CENTER);
-  cursor(ARROW);
   smooth(3);
 
+  handCursor = loadImage("cursor-hand.png");
+  
   resizeFactor = width/1920; //billederne er lavet i forhold til en 1920 * 1080 skærmopløsning
 
-  arrowCursor = loadImage("cursor-arrow - Kopi.png");
-  handCursor = loadImage("cursor-hand - Kopi.png");
 
   //fonte skal loades separat med P2D renderer når textSize() gør kvaliteten sløret
   //fontenes størrelser er lavet i forhold til skærmbredden
@@ -145,12 +148,12 @@ void draw() {
     if (hovering()) {
       if (!cursorHand) {
         cursorHand = true;
-        cursor(HAND);
+        cursor(handCursor, 9, 0);
       }
     } else {
       if (cursorHand) {
         cursorHand = false;
-        cursor(ARROW);
+        cursor(arrowCursor, 0, 0);
       }
     }
   } else {
