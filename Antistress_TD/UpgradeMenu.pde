@@ -15,7 +15,12 @@ class UpgradeMenu {
     exitButton = new Button(x+210, y+10, x+240, y+40);
     //bruges til at undersøge om man trykker inden for opgraderingsmenuen eller om den skal lukkes
     upgradeMenuButton = new Button(x, y, x+250, y+200);
+  }
 
+  void display() {
+    fill(200);
+    rect(x, y, x+250, y+200, 10);
+    
     switch(square.tower.towerNum) {
     case 0:
       if (!square.tower.upgraded) text = "Opgrader dette tårn for\nat det bliver bedre ved\nat blive bedre";
@@ -26,8 +31,8 @@ class UpgradeMenu {
       else text = "";
       break;
     case 2:
-      if (!square.tower.upgraded) text = "";
-      else text = "";
+      if (!square.tower.upgraded) text = "Dette tårn er værd: "+square.tower.actualWorth;
+      else text = "Dette tårn er værd: "+square.tower.actualWorth;
       break;
     case 3:
       if (!square.tower.upgraded) text = "";
@@ -38,11 +43,6 @@ class UpgradeMenu {
       else text = "";
       break;
     }
-  }
-
-  void display() {
-    fill(200);
-    rect(x, y, x+250, y+200, 10);
 
     textFont(normalFont);
     fill(0);
@@ -71,36 +71,44 @@ class UpgradeMenu {
     //exit knap
     else if (exitButton.collision()) {
       upgradeMenu = null;
-      
-    //sælgknap
+
+      //sælgknap
     } else if (sellButton.collision()) {
-      money += square.tower.worth;
-      //hvis man sælger en booster skal de boostede felter opdateres
-      if (square.tower.towerNum == 3) {
-        square.updateBoost();
-      }
-      upgradeMenu.square.tower = null;
-      upgradeMenu = null;
-      
-    //opgraderingsknap
+      sellPressed();
+
+      //opgraderingsknap
     } else if (upgradeButton != null && upgradeButton.collision()) {
-      if (money >= square.tower.upgradePrice) {
-        money -= square.tower.upgradePrice;
-        square.tower.upgraded = true;
-        square.tower.setStats(square.boostingStatus);
-        upgradeMenu = null;
+      upgradePressed();
+    }
+  }
+  
+  void sellPressed() {
+    money += square.tower.actualWorth;
+    //hvis man sælger en booster skal de boostede felter opdateres
+    if (square.tower.towerNum == 3) {
+      square.updateBoost();
+    }
+    upgradeMenu.square.tower = null;
+    upgradeMenu = null;
+  }
 
-        if (square.tower.towerNum == 3) {
-          for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
-            int col = square.colNum + i;
-            int row = square.rowNum + j;
+  void upgradePressed() {
+    if (money >= square.tower.upgradePrice) {
+      money -= square.tower.upgradePrice;
+      square.tower.upgraded = true;
+      square.tower.setStats(square.boostingStatus);
+      upgradeMenu = null;
 
-            if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
+      if (square.tower.towerNum == 3) {
+        for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
+          int col = square.colNum + i;
+          int row = square.rowNum + j;
 
-              squares[col][row].boostingStatus = 2;
-              if (squares[col][row].tower != null) {
-                squares[col][row].tower.setStats(squares[col][row].boostingStatus);
-              }
+          if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
+
+            squares[col][row].boostingStatus = 2;
+            if (squares[col][row].tower != null) {
+              squares[col][row].tower.setStats(squares[col][row].boostingStatus);
             }
           }
         }

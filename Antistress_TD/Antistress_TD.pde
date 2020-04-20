@@ -5,9 +5,10 @@
 
 int towerDragStatus, abilityDragStatus;
 int money;
-int resizeFactor;
 
-boolean gameOver;
+float resizeFactor;
+
+boolean gameOver, gameWon, levelFinished;
 boolean cursorHand;
 
 PImage[] fighterSprite, vikingAttack, vikingWalk;
@@ -20,23 +21,23 @@ TowerButton[] towerButtons = new TowerButton[5];
 AbilityButton[] abilityButtons = new AbilityButton[5];
 Square[][] squares = new Square[10][5];
 UpgradeMenu upgradeMenu;
+Level level;
 
 void setup() {
   //size(1600, 900);
   fullScreen(P2D);
-  
+
   arrowCursor = loadImage("cursor-arrow.png");
   cursor(arrowCursor, 0, 0);
-  
+
   text("Loading...", 200, 200);
   rectMode(CORNERS);
   imageMode(CENTER);
   smooth(3);
 
   handCursor = loadImage("cursor-hand.png");
-  
-  resizeFactor = width/1920; //billederne er lavet i forhold til en 1920 * 1080 skærmopløsning
 
+  resizeFactor = width/1920.0; //billederne er lavet i forhold til en 1920 * 1080 skærmopløsning
 
   //fonte skal loades separat med P2D renderer når textSize() gør kvaliteten sløret
   //fontenes størrelser er lavet i forhold til skærmbredden
@@ -51,7 +52,8 @@ void setup() {
 void draw() {
   if (frameCount == 1) {
     text("Loading...", 200, 200);
-  } else if (!gameOver) {
+  } else if (!gameOver && !gameWon) {
+
     fill(200);
     rect(-1, height * 0.85-1, width, height);
 
@@ -62,8 +64,14 @@ void draw() {
       square.display();
     }
 
-    projectileHandler();
-    opponentHandler();
+    //projektiler
+    for (int i = projectiles.size()-1; i >= 0; i--) {
+      boolean removed = projectiles.get(i).move();
+      if (!removed) projectiles.get(i).display();
+    }
+
+    //modstandere
+    level.opponentHandler();
 
 
     //tegn towerbuttons
@@ -97,11 +105,13 @@ void draw() {
     textFont(bigFont);
     text(money+"$", width*0.03, height*0.92);
 
+    //progressbar
+    level.displayProgressbar();
+    
     //upgraderingsmenu
     if (upgradeMenu != null) {
       upgradeMenu.display();
     }
-
 
     //trukket tower
     if (towerDragStatus > -1) {
@@ -132,7 +142,7 @@ void draw() {
     if (abilityDragStatus > -1) {
       for (Square[] squareRow : squares) for (Square square : squareRow) {
         if (square.tower != null) {
-          if (square.tower.towerNum != abilityDragStatus) square.darken();
+          if (square.tower.towerNum != abilityDragStatus%5) square.darken();
           else if (square.button.collision()) square.lighten();
         } else square.darken();
       }
@@ -157,11 +167,25 @@ void draw() {
       }
     }
   } else {
-    textFont(bigFont);
-    textAlign(CENTER);
-    text("GAME OVER", 960, 540);
-    noLoop();
+    message();
   }
+}
+
+void message() {
+  fill(255);
+  rect(width * .33, height * .33, width * .67, height * .67);
+  fill(0);
+  textFont(bigFont);
+  textAlign(CENTER);
+
+  if (gameOver) text("GAME OVER", width/2, height/2);
+  else text("Du vandt!", width/2, height/2);
+
+  textFont(mediumFont);
+
+  text("Tryk på mellemrum for at spille igen", width/2, height * .55);
+
+  noLoop();
 }
 
 
@@ -179,10 +203,13 @@ void mousePressed() {
       }
     }
     for (Square[] squareRow : squares) for (Square square : squareRow) {
-      if (square.button.collision() && square.tower != null) {
+      if (square.button.collision() && square.tower != null && abilityDragStatus == -1) {
         upgradeMenu = new UpgradeMenu(square);
         break;
       }
+    }
+    if (level.nextLevel != null && level.nextLevel.collision()) {
+      level.nextLevel();
     }
   } else {
     upgradeMenu.pressed();
@@ -204,9 +231,9 @@ void mouseReleased() {
   }
   if (abilityDragStatus > -1) {
     for (Square[] squareRow : squares) for (Square square : squareRow) {
-      if (square.button.collision() && square.tower != null && square.tower.towerNum == abilityDragStatus) {
+      if (square.button.collision() && square.tower != null && square.tower.towerNum == abilityDragStatus%5) {
         square.tower.ability();
-        abilityButtons[abilityDragStatus].cooldown = abilityButtons[abilityDragStatus].cooldownDur;
+        abilityButtons[abilityDragStatus%5].cooldown = abilityButtons[abilityDragStatus%5].cooldownDur;
         break;
       }
     }
@@ -216,7 +243,7 @@ void mouseReleased() {
 
 
 void keyPressed() {
-  if (!gameOver) {
+  if (!gameOver && !gameWon) {
     switch(key) {
     case 'q':
     case 'Q':
@@ -255,6 +282,62 @@ void keyPressed() {
         if (money >= towerButtons[4].price) towerDragStatus = 9;
       }
       break;
+
+    case '1':
+      if (abilityDragStatus == 5) abilityDragStatus = -1;
+      else if (abilityDragStatus > 4 || abilityDragStatus == -1) if (towerDragStatus == -1) {
+        if (abilityButtons[0].cooldown == 0) {
+          abilityDragStatus = 5;
+        }
+      }
+      break;
+    case '2':
+      if (abilityDragStatus == 6) abilityDragStatus = -1;
+      else if (abilityDragStatus > 4 || abilityDragStatus == -1) if (towerDragStatus == -1) {
+        if (abilityButtons[1].cooldown == 0) {
+          abilityDragStatus = 6;
+        }
+      }
+      break;
+    case '3':
+      if (abilityDragStatus == 7) abilityDragStatus = -1;
+      else if (abilityDragStatus > 4 || abilityDragStatus == -1) if (towerDragStatus == -1) {
+        if (abilityButtons[2].cooldown == 0) {
+          abilityDragStatus = 7;
+        }
+      }
+      break;
+    case '4':
+      if (abilityDragStatus == 8) abilityDragStatus = -1;
+      else if (abilityDragStatus > 4 || abilityDragStatus == -1) if (towerDragStatus == -1) {
+        if (abilityButtons[3].cooldown == 0) {
+          abilityDragStatus = 8;
+        }
+      }
+      break;
+    case '5':
+      if (abilityDragStatus == 9) abilityDragStatus = -1;
+      else if (abilityDragStatus > 4 || abilityDragStatus == -1) if (towerDragStatus == -1) {
+        if (abilityButtons[4].cooldown == 0) {
+          abilityDragStatus = 9;
+        }
+      }
+      break;
+
+      //opgraderingsmenu genvejstaster
+    case 'u':
+    case 'U':
+      if (upgradeMenu != null) {
+        upgradeMenu.upgradePressed();
+      }
+      break;
+    case 's':
+    case 'S':
+      if (upgradeMenu != null) {
+        upgradeMenu.sellPressed();
+      }
+      break;
+
     case '+':
       money += 1000;
       break;
@@ -263,12 +346,9 @@ void keyPressed() {
     //if (keyCode == ESC) {
     //  key = 0;
     //}
-  } else {
-    //todo:
-
-    //startUp();
-    //gameOver = false;
-    //loop();
+  } else if (key == ' ') {
+    startUp();
+    loop();
   }
 }
 
@@ -307,6 +387,8 @@ void startUp() {
   towerDragStatus= -1;
   abilityDragStatus = -1;
   money = 200;
+  level = new Level(0);
+
 
   //placering af hvert felt
   for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
@@ -320,32 +402,23 @@ void startUp() {
     towerButtons[i] = new TowerButton(x - int(width * 0.036), int(0.862 * height), x + int(width * 0.036), int(0.93 * height), i);
     abilityButtons[i] = new AbilityButton(x - int(0.015 * width), int(0.942 * height), x + int(0.015 * width), int(0.987 * height), i);
   }
-}
 
 
-void opponentHandler() {
-  if (frameCount%600 == 2) {
-    //random lane
-    int laneNum = int(random(5));
-    int y = int((squares[0][laneNum].y1 + squares[0][laneNum].y2) * .5);
-    int offset = int(random(-height * .02, height * .02));
-    y += offset;
 
-    opponentTowers.add(new OpponentTower(y, laneNum));
-  }
-  for (OpponentTower ot : opponentTowers) {
-    ot.move();
-    ot.display();
+  if (gameOver) {
+    gameOver = false;
+    for (int i = opponentTowers.size()-1; i >= 0; i--) {
+      opponentTowers.remove(opponentTowers.get(i));
+    }
+    for (int i = projectiles.size()-1; i >= 0; i--) {
+      projectiles.remove(projectiles.get(i));
+    }
+    upgradeMenu = null;
   }
 }
 
 
-void projectileHandler() {
-  for (int i = projectiles.size()-1; i >= 0; i--) {
-    boolean removed = projectiles.get(i).move();
-    if (!removed) projectiles.get(i).display();
-  }
-}
+
 
 
 //om musen holder over en knap og skal markeres med en hånd i stedet for en pil
@@ -364,27 +437,7 @@ boolean hovering() {
         return true;
       }
     }
-  } else if (upgradeMenu.sellButton.collision() || upgradeMenu.exitButton.collision() || upgradeMenu.upgradeButton != null && upgradeMenu.upgradeButton.collision()) {
-    return true;
-  }
-  return false;
-}
-
-boolean hovering2() {
-  if (towerDragStatus > -1 || abilityDragStatus > -1) return true;
-
-  if (upgradeMenu == null) {
-    for (TowerButton tb : towerButtons) if (tb.collision() && money >= tb.price) {
-      return true;
-    }
-    for (AbilityButton ab : abilityButtons) if (ab.collision()) {
-      return true;
-    }
-    for (Square[] squareRow : squares) for (Square square : squareRow) {
-      if (square.button.collision() && square.tower != null) {
-        return true;
-      }
-    }
+    if (level.nextLevel != null && level.nextLevel.collision()) return true;
   } else if (upgradeMenu.sellButton.collision() || upgradeMenu.exitButton.collision() || upgradeMenu.upgradeButton != null && upgradeMenu.upgradeButton.collision()) {
     return true;
   }

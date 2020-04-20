@@ -1,4 +1,4 @@
-class Projectile {
+class Projectile { //<>//
   int x, y, rangeX, laneNum;
   int speed, damage, size;
   //boolean upgraded;
@@ -13,15 +13,15 @@ class Projectile {
   boolean move() {
     x += speed;
 
-    if (x > rangeX) {
+    if (x > rangeX || x + size/2 > width) {
       projectiles.remove(this);
       return true;
     }
 
-    for (int i = opponentTowers.size()-1; i >= 0; i--) {
-      if (opponentTowers.get(i).laneNum == laneNum && opponentTowers.get(i).x - opponentTowers.get(i).xOffset + opponentTowers.get(i).wid >= x - size/2 && opponentTowers.get(i).x - opponentTowers.get(i).xOffset <= x + size/2) {
+    for (OpponentTower ot : opponentTowers) {
+      if (ot.laneNum == laneNum && ot.x + ot.offsetR >= x - size/2 && ot.x - ot.offsetL <= x + size/2) {
 
-        hitOpponent(opponentTowers.get(i));
+        hitOpponent(ot);
 
         projectiles.remove(this);
         return true;
