@@ -130,11 +130,12 @@ class Fighter extends ShooterTower {
   void activate() {
     //hvis en animation er i gang
     if (spriteIndex > 0) {
-      if (spriteIndex >= fighter.length-1) {
-        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
+      spriteIndex += 0.1;
+      if (spriteIndex >= fighter.length) {
+        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
         spriteIndex = 0;
         hasShot = false;
-      } else spriteIndex += 0.1;
+      }
 
       //if (!hasShot && spriteIndex >= 4) {
       //  projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
@@ -149,7 +150,7 @@ class Fighter extends ShooterTower {
       if (inRange() && shotCooldown <= shotSpeed-abilityShotSpeed) {
         //hvis en animation allerede er i gang
         if (spriteIndex > 0 && !hasShot) {
-          projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
+          projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
         }
         shotCooldown = shotSpeed;
         spriteIndex = 1;
@@ -158,7 +159,7 @@ class Fighter extends ShooterTower {
     } else if (shouldShoot()) {
       //hvis en animation allerede er i gang
       if (spriteIndex > 0 && !hasShot) {
-        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
+        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
       }
       spriteIndex = 1;
       hasShot = false;
@@ -192,7 +193,8 @@ class Fighter extends ShooterTower {
   }
 
   void display() {
-    image(fighter[floor(spriteIndex)], x, y);
+    if (!upgraded) image(fighter[floor(spriteIndex)], x, y);
+    else image(fighterlv2[floor(spriteIndex)], x, y);
 
     super.display();
   }
@@ -211,10 +213,10 @@ class Sniper extends ShooterTower {
 
   void activate() {
     if (abilityCooldown > 0) {
-      if (frameCount%2 == 0) projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range));
+      if (frameCount%2 == 0) projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
       abilityCooldown--;
     } else if (shouldShoot()) {
-      projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range));
+      projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
     }
   }
 
@@ -259,7 +261,7 @@ class Freezer extends ShooterTower {
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new FreezerProjectile(x + offsetR, y, laneNum, range, slowDur, freezeDur));
+      projectiles.add(new FreezerProjectile(x + offsetR, y, laneNum, range, slowDur, freezeDur, upgraded));
     }
   }
 
@@ -310,7 +312,7 @@ class Blaster extends ShooterTower {
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new BlasterProjectile(x + offsetR, y, damage, laneNum, range));
+      projectiles.add(new BlasterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
     }
   }
 
@@ -421,15 +423,12 @@ class OpponentTower extends Tower {
         if (frameCount%4 == 0) x--;
       } else if (frameCount%2 == 0) x--;
 
-      if (x < -40) gameOver = true;
+      if (x < -40) {
+        gameOver = true;
+        gameMenu = true;
+      }
     }
-  }
-
-  void display() {
-    if (freezeCooldown > 0) tint(150, 150, 255);
-    else if (slowCooldown > 0) tint(200, 200, 255);
-
-
+    
     if (freezeCooldown == 0) {
 
       if (slowCooldown > 0) {
@@ -443,6 +442,11 @@ class OpponentTower extends Tower {
       if (indexAttack >= viking1Attack.length) indexAttack = 0;
       if (indexWalk >= viking1Attack.length) indexWalk = 0;
     }
+  }
+
+  void display() {
+    if (freezeCooldown > 0) tint(150, 150, 255);
+    else if (slowCooldown > 0) tint(200, 200, 255);
     
     if (collision) {
       image(viking1Attack[floor(indexAttack)], x, y);

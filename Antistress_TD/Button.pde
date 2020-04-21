@@ -15,7 +15,7 @@ class Button {
     return false;
   }
 
-  void display(String text) {
+  void display(String text) { //todo
     rect(x1, y1, x2, y2, 5);
     fill(0);
     text(text, (x1+x2)*.5, (y1+y2)*.5);

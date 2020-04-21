@@ -1,13 +1,14 @@
-class Projectile { //<>// //<>//
+class Projectile { //<>//
   int x, y, rangeX, laneNum;
   int speed, damage, size;
-  //boolean upgraded;
+  boolean upgraded;
 
-  Projectile(int x_, int y_, int laneNum_, int range) {
+  Projectile(int x_, int y_, int laneNum_, int range, boolean upgraded_) {
     x = x_;
     y = y_;
     laneNum = laneNum_;
     rangeX = range*(width/squares.length-1) + x;
+    upgraded = upgraded_;
   }
 
   boolean move() {
@@ -44,22 +45,27 @@ class Projectile { //<>// //<>//
   }
 }
 
-
+//todo: check om den behøver at sende alle variabler (boosteren er en ting)
 
 class FighterProjectile extends Projectile {
-  //roterende knive
-  FighterProjectile(int x, int y, int damage_, int laneNum, int range) {
-    super(x, y, laneNum, range);
+  
+  FighterProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+    super(x, y, laneNum, range, upgraded);
     speed = 5;
     damage = damage_;
     size = 10;
+  }
+  
+  void display() {
+    if (!upgraded) image(fighterProjectile, x, y);
+    else image(fighterlv2Projectile, x, y);
   }
 }
 
 class SniperProjectile extends Projectile {
   //pile
-  SniperProjectile(int x, int y, int damage_, int laneNum, int range) {
-    super(x, y, laneNum, range);
+  SniperProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+    super(x, y, laneNum, range, upgraded);
     speed = 8;
     damage = damage_;
     size = 5;
@@ -69,8 +75,8 @@ class SniperProjectile extends Projectile {
 class FreezerProjectile extends Projectile {
   //roterende snefnug/snebolde
   int slowDur, freezeDur;
-  FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_) {
-    super(x, y, laneNum, range);
+  FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
+    super(x, y, laneNum, range, upgraded);
     speed = 4;
     damage = 0;
     size = 10;
@@ -94,8 +100,8 @@ class FreezerProjectile extends Projectile {
 class BlasterProjectile extends Projectile {
   int explosionSize;
   //roterende bomber/ikke-roterende raketter
-  BlasterProjectile(int x, int y, int damage_, int laneNum, int range) {
-    super(x, y, laneNum, range);
+  BlasterProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+    super(x, y, laneNum, range, upgraded);
     speed = 3;
     damage = damage_;
     size = 30;

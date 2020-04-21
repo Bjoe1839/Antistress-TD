@@ -46,7 +46,10 @@ class Level {
           if (num < 4) {
             levelFinished = true;
             nextLevel = new Button(int(width * .97), int(height * .95), int(width * .99), int(height * .99));
-          } else gameWon = true;
+          } else {
+            gameWon = true;
+            gameMenu = true;
+          }
         }
       }
 
@@ -72,7 +75,7 @@ class Level {
     setStats();
     nextLevel = null;
     levelFinished = false;
-    
+
     for (AbilityButton ab : abilityButtons) {
       ab.cooldown = 0;
     }
@@ -98,7 +101,7 @@ class Level {
       fill(255);
       nextLevel.display("");
 
-      if (frameCount%120 < 60) {
+      if (frameCount%120 < 60 || gameMenu) {
         fill(0, 255, 0);
         triangle(nextLevel.x1 + 5, nextLevel.y1 + 5, nextLevel.x1 + 5, nextLevel.y2 - 5, nextLevel.x2 - 5, (nextLevel.y2 + nextLevel.y1) * .5);
       }
