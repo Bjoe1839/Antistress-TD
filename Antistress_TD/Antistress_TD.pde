@@ -11,15 +11,19 @@ float resizeFactor;
 boolean gameOver, gameWon, levelFinished;
 boolean cursorHand;
 
-PImage[] fighterSprite, vikingAttack, vikingWalk;
+//sprites
+PImage[] fighter, fighterUpgraded, viking1Walk, viking1Attack, viking2Walk, viking2Attack;
 
 PImage arrowCursor, handCursor;
 PFont normalFont, mediumFont, bigFont;
-ArrayList<OpponentTower> opponentTowers = new ArrayList<OpponentTower>();
-ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
-TowerButton[] towerButtons = new TowerButton[5];
-AbilityButton[] abilityButtons = new AbilityButton[5];
-Square[][] squares = new Square[10][5];
+
+ArrayList<OpponentTower> opponentTowers;
+ArrayList<Projectile> projectiles;
+
+TowerButton[] towerButtons;
+AbilityButton[] abilityButtons;
+Square[][] squares;
+
 UpgradeMenu upgradeMenu;
 Level level;
 
@@ -40,7 +44,6 @@ void setup() {
   resizeFactor = width/1920.0; //billederne er lavet i forhold til en 1920 * 1080 skærmopløsning
 
   //fonte skal loades separat med P2D renderer når textSize() gør kvaliteten sløret
-  //fontenes størrelser er lavet i forhold til skærmbredden
   normalFont = createFont("Gadugi Bold", int(0.009*width));
   mediumFont = createFont("Gadugi Bold", int(0.012*width));
   bigFont = createFont("Gadugi Bold", int(0.021*width));
@@ -107,7 +110,7 @@ void draw() {
 
     //progressbar
     level.displayProgressbar();
-    
+
     //upgraderingsmenu
     if (upgradeMenu != null) {
       upgradeMenu.display();
@@ -117,7 +120,7 @@ void draw() {
     if (towerDragStatus > -1) {
       switch(towerDragStatus%5) {
       case 0:
-        image(fighterSprite[0], mouseX, mouseY);
+        image(fighter[0], mouseX, mouseY);
         break;
       case 1:
         fill(0, 255, 0);
@@ -355,13 +358,22 @@ void keyPressed() {
 
 void createSprites() {
   PImage spriteSheet = loadImage("Fighter.png");
-  fighterSprite = cutSpriteSheet(spriteSheet, 3, 2, 4);
+  fighter = cutSpriteSheet(spriteSheet, 3, 2, 4);
+  
+  spriteSheet = loadImage("Fighter_upgraded.png");
+  fighterUpgraded = cutSpriteSheet(spriteSheet, 3, 2, 4);
 
-  spriteSheet = loadImage("Viking_attack.png");
-  vikingAttack = cutSpriteSheet(spriteSheet, 3, 2, 4);
+  spriteSheet = loadImage("Viking_lv1_walk.png");
+  viking1Walk = cutSpriteSheet(spriteSheet, 3, 2, 4);
 
-  spriteSheet = loadImage("Viking_walk.png");
-  vikingWalk = cutSpriteSheet(spriteSheet, 3, 2, 4);
+  spriteSheet = loadImage("Viking_lv1_attack.png");
+  viking1Attack = cutSpriteSheet(spriteSheet, 3, 2, 4);
+
+  spriteSheet = loadImage("Viking_lv2_walk.png");
+  viking2Walk = cutSpriteSheet(spriteSheet, 3, 2, 4);
+
+  spriteSheet = loadImage("Viking_lv2_attack.png");
+  viking2Attack = cutSpriteSheet(spriteSheet, 3, 2, 5);
 }
 
 
@@ -388,7 +400,19 @@ void startUp() {
   abilityDragStatus = -1;
   money = 200;
   level = new Level(0);
-
+  
+  opponentTowers = new ArrayList<OpponentTower>();
+  projectiles = new ArrayList<Projectile>();
+  towerButtons = new TowerButton[5];
+  abilityButtons = new AbilityButton[5];
+  squares = new Square[10][5];
+  
+  upgradeMenu = null;
+  gameOver = false;
+  gameWon = false;
+  levelFinished = true;
+  level.nextLevel = new Button(int(width * .97), int(height * .95), int(width * .99), int(height * .99));
+  
 
   //placering af hvert felt
   for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
@@ -401,19 +425,6 @@ void startUp() {
 
     towerButtons[i] = new TowerButton(x - int(width * 0.036), int(0.862 * height), x + int(width * 0.036), int(0.93 * height), i);
     abilityButtons[i] = new AbilityButton(x - int(0.015 * width), int(0.942 * height), x + int(0.015 * width), int(0.987 * height), i);
-  }
-
-
-
-  if (gameOver) {
-    gameOver = false;
-    for (int i = opponentTowers.size()-1; i >= 0; i--) {
-      opponentTowers.remove(opponentTowers.get(i));
-    }
-    for (int i = projectiles.size()-1; i >= 0; i--) {
-      projectiles.remove(projectiles.get(i));
-    }
-    upgradeMenu = null;
   }
 }
 

@@ -45,7 +45,7 @@ class Square {
       switch(towerDragStatus%5) {
       case 0:
         tint(255, 50);
-        image(fighterSprite[0], x, y);
+        image(fighter[0], x, y);
         noTint();
         break;
       case 1:

@@ -130,7 +130,7 @@ class Fighter extends ShooterTower {
   void activate() {
     //hvis en animation er i gang
     if (spriteIndex > 0) {
-      if (spriteIndex >= fighterSprite.length-1) {
+      if (spriteIndex >= fighter.length-1) {
         projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
         spriteIndex = 0;
         hasShot = false;
@@ -192,7 +192,7 @@ class Fighter extends ShooterTower {
   }
 
   void display() {
-    image(fighterSprite[floor(spriteIndex)], x, y);
+    image(fighter[floor(spriteIndex)], x, y);
 
     super.display();
   }
@@ -440,14 +440,14 @@ class OpponentTower extends Tower {
         else indexWalk += 0.06;
       }
 
-      if (indexAttack >= vikingAttack.length) indexAttack = 0;
-      if (indexWalk >= vikingAttack.length) indexWalk = 0;
+      if (indexAttack >= viking1Attack.length) indexAttack = 0;
+      if (indexWalk >= viking1Attack.length) indexWalk = 0;
     }
     
     if (collision) {
-      image(vikingAttack[floor(indexAttack)], x, y);
+      image(viking1Attack[floor(indexAttack)], x, y);
     } else {
-      image(vikingWalk[floor(indexWalk)], x, y);
+      image(viking1Walk[floor(indexWalk)], x, y);
     }
 
 

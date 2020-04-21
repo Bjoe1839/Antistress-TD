@@ -1,4 +1,4 @@
-class Projectile { //<>//
+class Projectile { //<>// //<>//
   int x, y, rangeX, laneNum;
   int speed, damage, size;
   //boolean upgraded;

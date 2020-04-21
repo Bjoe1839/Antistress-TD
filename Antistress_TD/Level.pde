@@ -2,12 +2,13 @@ class Level {
   int num, dur;
   float cooldown;
   int opponentSpawnRate;
+  int startFrame;
   Button nextLevel;
   //opponent1chance, opponent2chance..
 
   Level(int num_) {
     num = num_;
-    dur = 15;
+    dur = 5;
     cooldown = dur;
 
     setStats();
@@ -40,16 +41,16 @@ class Level {
         cooldown -= .5;
       }
       if (cooldown <= 0) {
-        if (num < 4) {
-          cooldown = 0;
-          if (opponentTowers.size() == 0 && projectiles.size() == 0) {
+        cooldown = 0;
+        if (opponentTowers.size() == 0 && projectiles.size() == 0) {
+          if (num < 4) {
             levelFinished = true;
             nextLevel = new Button(int(width * .97), int(height * .95), int(width * .99), int(height * .99));
-          }
-        } else gameWon = true;
+          } else gameWon = true;
+        }
       }
 
-      if (frameCount%opponentSpawnRate == 2 && cooldown > 0) {
+      if (frameCount%opponentSpawnRate == startFrame && cooldown > 0) {
         //random lane
         int laneNum = int(random(5));
         int y = int((squares[0][laneNum].y1 + squares[0][laneNum].y2) * .5);
@@ -66,11 +67,16 @@ class Level {
   }
 
   void nextLevel() {
-    level.cooldown = level.dur;
-    level.num++;
-    level.setStats();
-    level.nextLevel = null;
+    if (cooldown <= 0) num++;
+    cooldown = dur;
+    setStats();
+    nextLevel = null;
     levelFinished = false;
+    
+    for (AbilityButton ab : abilityButtons) {
+      ab.cooldown = 0;
+    }
+    startFrame = frameCount%opponentSpawnRate + 1;
   }
 
   void displayProgressbar() {
@@ -91,8 +97,11 @@ class Level {
     if (nextLevel != null) {
       fill(255);
       nextLevel.display("");
-      fill(0, 255, 0);
-      triangle(nextLevel.x1 + 5, nextLevel.y1 + 5, nextLevel.x1 + 5, nextLevel.y2 - 5, nextLevel.x2 - 5, (nextLevel.y2 + nextLevel.y1) * .5);
+
+      if (frameCount%120 < 60) {
+        fill(0, 255, 0);
+        triangle(nextLevel.x1 + 5, nextLevel.y1 + 5, nextLevel.x1 + 5, nextLevel.y2 - 5, nextLevel.x2 - 5, (nextLevel.y2 + nextLevel.y1) * .5);
+      }
     }
   }
 }
