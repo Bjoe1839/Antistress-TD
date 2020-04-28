@@ -21,15 +21,27 @@ class Square {
   }
 
   void display() {
-    if (boostingStatus == 0) fill(255);
-    else if (boostingStatus == 1) fill(230, 230, 255);
-    else fill(210, 210, 255);
+    if (boostingStatus == 0) noFill();
+    else if (boostingStatus > 0) {
+      fill(255, 255, 230, 180);
+      if (!gameMenu && random(1) < 0.01) {
+        int x = int(random(x1, x2));
+        int y = int(random(y1, y2));
+        particles.add(new Particle(x, y));
+      }
+    } else fill(255, 255, 230);
 
-    rect(x1, y1, x2, y2);
+    //rect(x1, y1, x2, y2);
 
     if (tower != null) {
       if (tower.health > 0) {
         tower.display();
+        if (money >= tower.upgradePrice && !tower.upgraded) {
+          int x = int((x2 - x1) * .7 + x1);
+          int y = int((y2 - y1) * .77 + y1);
+
+          image(upgradeIcon, x, y);
+        }
       } else {
         if (upgradeMenu != null && upgradeMenu.square == this) upgradeMenu = null;
         if (tower.towerNum == 3) {
@@ -39,8 +51,8 @@ class Square {
       }
     } else if (towerDragStatus > -1 && button.collision()) {
       //tårnet får koordinaterne midt på feltet
-      int x = int((x2+x1)*.5);
-      int y = int((y2+y1)*.5);
+      int x = int((x2 + x1) * .5);
+      int y = int((y2 + y1) * .5);
 
       switch(towerDragStatus%5) {
       case 0:
@@ -49,10 +61,9 @@ class Square {
         noTint();
         break;
       case 1:
-        fill(0, 255, 0, 50);
-        stroke(0, 50);
-        circle(x, y, 80);
-        stroke(0);
+        tint(255, 50);
+        image(archer[0], x, y);
+        noTint();
         break;
       case 2:
         fill(0, 0, 255, 50);
@@ -61,10 +72,9 @@ class Square {
         stroke(0);
         break;
       case 3:
-        fill(255, 255, 0, 50);
-        stroke(0, 50);
-        circle(x, y, 80);
-        stroke(0);
+        tint(255, 50);
+        image(booster[0], x, y);
+        noTint();
         break;
       case 4:
         fill(0, 50);
@@ -77,15 +87,15 @@ class Square {
   }
 
   void addTower() {
-    int x = int((x2+x1)*.5);
-    int y = int((y2+y1)*.5);
+    int x = int((x2 + x1) * .5);
+    int y = int((y2 + y1) * .5);
 
     switch(towerDragStatus%5) {
     case 0:
       tower = new Fighter(x, y, true, boostingStatus, rowNum);
       break;
     case 1:
-      tower = new Sniper(x, y, true, boostingStatus, rowNum);
+      tower = new Archer(x, y, true, boostingStatus, rowNum);
       break;
     case 2:
       tower = new Freezer(x, y, true, boostingStatus, rowNum);

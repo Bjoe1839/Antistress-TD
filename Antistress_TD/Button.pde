@@ -15,10 +15,11 @@ class Button {
     return false;
   }
 
-  void display(String text) { //todo
+  void display(String text, color c, int alfa) {
+    fill(c);
     rect(x1, y1, x2, y2, 5);
-    fill(0);
-    text(text, (x1+x2)*.5, (y1+y2)*.5);
+    fill(0, alfa);
+    text(text, (x1 + x2) * .5, (y1 + y2) * .5 - 5);
   }
 }
 
@@ -62,7 +63,9 @@ class DragButton extends Button {
       rect(mouseX-len, y1-220, mouseX+len, y1-10, 15);
       fill(0);
       textFont(normalFont);
+      textAlign(CORNER);
       text(text, mouseX-len+7, y1-200);
+      textAlign(CENTER, CENTER);
     }
     fill(0);
   }
@@ -84,11 +87,13 @@ class TowerButton extends DragButton {
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
       towerImg = fighter[0].copy();
-      towerImg.resize(0, int(resizeFactor * towerImg.height * .57));
+      towerImg.resize(0, int(resizeFactor * towerImg.height * .5)); //done
       break;
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
       price = 100;
+      towerImg = archer[0].copy();
+      towerImg.resize(0, int(resizeFactor * towerImg.height * .5));
       break;
     case 2:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: E";
@@ -97,6 +102,8 @@ class TowerButton extends DragButton {
     case 3:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: R";
       price = 250;
+      towerImg = booster[0].copy();
+      towerImg.resize(0, int(resizeFactor * towerImg.height * .5));
       break;
     case 4:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: T";
@@ -108,8 +115,8 @@ class TowerButton extends DragButton {
   void display(int status) {
     super.display(status);
 
-    int x = int((x2-x1)*.3 + x1);
-    int y = int((y2+y1)*.5);
+    int x = int((x2 - x1) * .3 + x1);
+    int y = int((y2 + y1) * .5);
 
 
     if (status == 3) {
@@ -121,8 +128,11 @@ class TowerButton extends DragButton {
     else fill(0, 200, 0);
     textFont(mediumFont);
 
-    text(price+"$", x+35, y+9);
+    textAlign(RIGHT, CENTER);
+    text(price+"$", x2-5, y);
+    textAlign(CENTER, CENTER);
 
+    //done
     if (towerImg != null) {
       image(towerImg, x, y);
     }
@@ -138,7 +148,7 @@ class AbilityButton extends DragButton {
     super(x1, y1, x2, y2, towerNum);
     switch(towerNum) {
     case 0:
-      text = "Boost tårn 1 med denne evne\nDen her evne gør tårn 1 bedre.\nTårnet bliver bedre i et lille\nstykke tid\n\nGenvejstast: 1";
+      text = "Boost tårn 1 med denne evne\nDen her evne gør tårn 1 bedre.\nTårnet bliver bedre i et lille\nstykke tid\n\nGenvejstast: 1\n";
       cooldownDur = 10 * 60;
       break;
     case 1:
@@ -170,6 +180,15 @@ class AbilityButton extends DragButton {
       x++;
       y += 3;
     }
-    triangle(x-15, y+15, x+15, y+15, x, y-15);
+    if (cooldown == 0) triangle(x-15, y+15, x+15, y+15, x, y-15);
+    else {
+      fill(200, 0, 0);
+      triangle(x-15, y+15, x+15, y+15, x, y-15);
+
+      //cooldownbar
+      int barX = int(map(cooldown, 0, cooldownDur, x1, x2));
+      fill(0, 0, 200);
+      rect(x1, y2+11, barX, y2+16, 3);
+    }
   }
 }

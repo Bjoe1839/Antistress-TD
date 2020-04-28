@@ -3,12 +3,13 @@ class Level {
   float cooldown;
   int opponentSpawnRate;
   int startFrame;
+  int axemanChance, warriorChance, shieldwallChance;
+  
   Button nextLevel;
-  //opponent1chance, opponent2chance..
 
   Level(int num_) {
     num = num_;
-    dur = 5;
+    dur = 4;
     cooldown = dur;
 
     setStats();
@@ -17,19 +18,34 @@ class Level {
   void setStats() {
     switch(num) {
     case 0:
-      opponentSpawnRate = 600;
+      opponentSpawnRate = 350;
+      axemanChance = 100;
+      warriorChance = 0;
+      shieldwallChance = 0;
       break;
     case 1:
-      opponentSpawnRate = 300;
+      opponentSpawnRate = 250;
+      axemanChance = 80;
+      warriorChance = 20;
+      shieldwallChance = 0;
       break;
     case 2:
-      opponentSpawnRate = 200;
+      opponentSpawnRate = 250;
+      axemanChance = 30;
+      warriorChance = 45;
+      shieldwallChance = 15;
       break;
     case 3:
-      opponentSpawnRate = 100;
+      opponentSpawnRate = 200;
+      axemanChance = 0;
+      warriorChance = 60;
+      shieldwallChance = 25;
       break;
     case 4:
-      opponentSpawnRate = 50;
+      opponentSpawnRate = 100;
+      axemanChance = 0;
+      warriorChance = 40;
+      shieldwallChance = 20;
       break;
     }
   }
@@ -49,6 +65,7 @@ class Level {
           } else {
             gameWon = true;
             gameMenu = true;
+            gameBegun = false;
           }
         }
       }
@@ -59,8 +76,25 @@ class Level {
         int y = int((squares[0][laneNum].y1 + squares[0][laneNum].y2) * .5);
         int offset = int(random(-height * .02, height * .02));
         y += offset;
+        int opponentNum;
 
-        opponentTowers.add(new OpponentTower(y, laneNum));
+        int r = round(random(100));
+        if (r < axemanChance) {
+          opponentNum = 0;
+        }
+        else {
+          r -= axemanChance;
+          if (r < warriorChance) opponentNum = 1;
+          else {
+            r -= warriorChance;
+            if (r < shieldwallChance) opponentNum = 2;
+            else {
+              opponentNum = 3;
+            }
+          }
+        }
+        opponentTowers.add(new OpponentTower(y, laneNum, opponentNum));
+        
       }
       for (OpponentTower ot : opponentTowers) {
         ot.move();
@@ -86,7 +120,7 @@ class Level {
     fill(255);
     rect(width * .8, height * .87, width * .99, height * .92);
 
-    int x = int(map(cooldown, 0, dur, width * .8, width * .99));
+    int x = round(map(cooldown, 0, dur, width * .8, width * .99));
     fill(0, 255, 0);
     rect(x, height * .87, width * .99, height * .92);
 
@@ -94,12 +128,11 @@ class Level {
     textAlign(RIGHT, TOP);
     fill(0);
     text("Level "+(num+1), width * .99, height * .92);
+    textAlign(CENTER, CENTER);
 
-    textAlign(LEFT);
 
     if (nextLevel != null) {
-      fill(255);
-      nextLevel.display("");
+      nextLevel.display("", color(255), 255);
 
       if (frameCount%120 < 60 || gameMenu) {
         fill(0, 255, 0);

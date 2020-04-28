@@ -46,22 +46,29 @@ class UpgradeMenu {
 
     textFont(normalFont);
     fill(0);
+    textAlign(CORNER);
     text(text, x+7, y+22);
-
+    
+    textAlign(LEFT, BOTTOM);
+    textFont(smallFont);
+    
+    if (upgradeButton != null) text("Opgrader", upgradeButton.x1, upgradeButton.y1);
+    text("Sælg", sellButton.x1, sellButton.y1);
+    
     textAlign(CENTER, CENTER);
-
+    
+    textFont(normalFont);
+    
     if (upgradeButton != null) {
-      fill(0, 255, 0);
-      upgradeButton.display("up");
+      
+      upgradeButton.display(square.tower.upgradePrice+"$", color(100, 255, 100), 255);
     }
 
-    fill(255, 0, 0);
-    sellButton.display("$");
+    sellButton.display(square.tower.actualWorth+"$", color(255, 0, 0), 255);
+    
 
-    fill(255, 0, 0);
-    exitButton.display("X");
+    exitButton.display("X", color(255, 0, 0), 255);
 
-    textAlign(CORNER);
   }
 
   void pressed() {

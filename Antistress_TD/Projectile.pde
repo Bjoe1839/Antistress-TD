@@ -45,30 +45,45 @@ class Projectile { //<>//
   }
 }
 
-//todo: check om den behøver at sende alle variabler (boosteren er en ting)
-
 class FighterProjectile extends Projectile {
-  
+
   FighterProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
-    speed = 5;
     damage = damage_;
-    size = 10;
+    if (!upgraded) {
+      size = fighterProjectile.width;
+      speed = 5;
+    }
+    else {
+      size = fighterlv2Projectile.width;
+      speed = 6;
+    }
   }
-  
+
   void display() {
     if (!upgraded) image(fighterProjectile, x, y);
     else image(fighterlv2Projectile, x, y);
   }
 }
 
-class SniperProjectile extends Projectile {
-  //pile
-  SniperProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+class ArcherProjectile extends Projectile {
+
+  ArcherProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
-    speed = 8;
+
     damage = damage_;
-    size = 5;
+    if (!upgraded) {
+      size = archerProjectile.width;
+      speed = 15;
+    } else {
+      size = archerlv2Projectile.width;
+      speed = 20;
+    }
+  }
+
+  void display() {
+    if (!upgraded) image(archerProjectile, x, y);
+    else image(archerlv2Projectile, x, y);
   }
 }
 

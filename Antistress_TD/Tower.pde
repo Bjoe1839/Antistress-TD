@@ -1,5 +1,6 @@
 class Tower {
-  int x, y;
+  float x;
+  int y;
   int health, maxHealth;
   int offsetL, offsetR; //hvor billedets kollision strækker sig over
 
@@ -8,6 +9,10 @@ class Tower {
     y = y_;
     offsetL = int(offsetL_ * resizeFactor);
     offsetR = int(offsetR_ * resizeFactor);
+  }
+
+  Tower(int y_) {
+    y = y_;
   }
 
   void display() {
@@ -23,7 +28,7 @@ class Tower {
     int hei = int(70 * resizeFactor);
 
     int xEnd = int(map(health, 0, maxHealth, x - len, x + len));
-    rect(x - len, y - hei , xEnd, y - hei + 5);
+    rect(x - len, y - hei, xEnd, y - hei + 5);
     stroke(0);
   }
 }
@@ -81,7 +86,8 @@ class ShooterTower extends FriendlyTower {
 
   boolean inRange() {
     for (OpponentTower opponent : opponentTowers) {
-      if (opponent.laneNum == laneNum && opponent.x - x < range * (width/squares.length-1) && opponent.x - x >= 0) {
+      int d = int(opponent.x - opponent.offsetL - x);
+      if (opponent.laneNum == laneNum && d < range * (width/squares.length-1) && d >= 0) {
         return true;
       }
     }
@@ -119,7 +125,7 @@ class Fighter extends ShooterTower {
   boolean hasShot;
 
   Fighter(int x, int y, boolean placed, int boostingStatus, int laneNum) {
-    super(x, y, 13, 35, placed, 0, laneNum);
+    super(x, y, 13, 19, placed, 0, laneNum);
 
     setStats(boostingStatus);
     health = maxHealth;
@@ -132,15 +138,10 @@ class Fighter extends ShooterTower {
     if (spriteIndex > 0) {
       spriteIndex += 0.1;
       if (spriteIndex >= fighter.length) {
-        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+        projectiles.add(new FighterProjectile(int(x + offsetR), y, damage, laneNum, range, upgraded));
         spriteIndex = 0;
         hasShot = false;
       }
-
-      //if (!hasShot && spriteIndex >= 4) {
-      //  projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range));
-      //  hasShot = true;
-      //}
     }
 
     //hvis cooldown ability er aktiveret
@@ -150,7 +151,7 @@ class Fighter extends ShooterTower {
       if (inRange() && shotCooldown <= shotSpeed-abilityShotSpeed) {
         //hvis en animation allerede er i gang
         if (spriteIndex > 0 && !hasShot) {
-          projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+          projectiles.add(new FighterProjectile(int(x + offsetR), y, damage, laneNum, range, upgraded));
         }
         shotCooldown = shotSpeed;
         spriteIndex = 1;
@@ -159,7 +160,7 @@ class Fighter extends ShooterTower {
     } else if (shouldShoot()) {
       //hvis en animation allerede er i gang
       if (spriteIndex > 0 && !hasShot) {
-        projectiles.add(new FighterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+        projectiles.add(new FighterProjectile(int(x + offsetR), y, damage, laneNum, range, upgraded));
       }
       spriteIndex = 1;
       hasShot = false;
@@ -201,10 +202,13 @@ class Fighter extends ShooterTower {
 }
 
 
-class Sniper extends ShooterTower {
-  int abilityCooldown;
 
-  Sniper(int x, int y, boolean placed, int boostingStatus, int laneNum) {
+
+class Archer extends ShooterTower {
+  int abilityCooldown;
+  boolean hasShot;
+
+  Archer(int x, int y, boolean placed, int boostingStatus, int laneNum) {
     super(x, y, 40, 40, placed, 1, laneNum);
     setStats(boostingStatus);
     health = maxHealth;
@@ -212,11 +216,37 @@ class Sniper extends ShooterTower {
   }
 
   void activate() {
+    //hvis cooldown ability er aktiveret
     if (abilityCooldown > 0) {
-      if (frameCount%2 == 0) projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+      spriteIndex++;
       abilityCooldown--;
-    } else if (shouldShoot()) {
-      projectiles.add(new SniperProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+      shotCooldown = shotSpeed;
+      if (abilityCooldown == 0) {
+        spriteIndex = 0;
+        shotCooldown = 0;
+      }
+    }
+
+    //hvis en animation er i gang
+    if (spriteIndex > 0) {
+      if (abilityCooldown == 0) spriteIndex += 0.08;
+      if (spriteIndex >= archer.length-1) {
+        if (!hasShot) projectiles.add(new ArcherProjectile(int(x + offsetR), y - int(16  * resizeFactor), damage, laneNum, range, upgraded));
+        hasShot = true;
+        if (spriteIndex >= archer.length) {
+          spriteIndex = 0;
+          hasShot = false;
+        }
+      }
+    }
+
+    if (shouldShoot()) {
+      //hvis en animation allerede er i gang
+      if (spriteIndex > 0 && !hasShot) {
+        projectiles.add(new ArcherProjectile(int(x + offsetR), y - int(16  * resizeFactor), damage, laneNum, range, upgraded));
+      }
+      spriteIndex = 1;
+      hasShot = false;
     }
   }
 
@@ -225,8 +255,8 @@ class Sniper extends ShooterTower {
       worth = 60;
       actualWorth = worth;
       maxHealth = 150;
-      shotSpeed = 45;
-      damage = 3;
+      shotSpeed = 75;
+      damage = 5;
       range = 9;
     } else {
       worth = 150;
@@ -241,8 +271,8 @@ class Sniper extends ShooterTower {
   }
 
   void display() {
-    fill(0, 255, 0);
-    circle(x, y, 80);
+    if (!upgraded) image(archer[floor(spriteIndex)], x, y);
+    else image(archerlv2[floor(spriteIndex)], x, y);
 
     super.display();
   }
@@ -261,7 +291,7 @@ class Freezer extends ShooterTower {
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new FreezerProjectile(x + offsetR, y, laneNum, range, slowDur, freezeDur, upgraded));
+      projectiles.add(new FreezerProjectile(int(x + offsetR), y, laneNum, range, slowDur, freezeDur, upgraded));
     }
   }
 
@@ -312,7 +342,7 @@ class Blaster extends ShooterTower {
 
   void activate() {
     if (shouldShoot()) {
-      projectiles.add(new BlasterProjectile(x + offsetR, y, damage, laneNum, range, upgraded));
+      projectiles.add(new BlasterProjectile(int(x + offsetR), y, damage, laneNum, range, upgraded));
     }
   }
 
@@ -350,6 +380,7 @@ class Booster extends FriendlyTower {
   }
 
   void activate() {
+    spriteIndex += .08;
   }
 
   void setStats() {
@@ -365,8 +396,8 @@ class Booster extends FriendlyTower {
   }
 
   void display() {
-    fill(255, 255, 0);
-    circle(x, y, 80);
+    if (!upgraded) image(booster[floor(spriteIndex%booster.length)], x, y);
+    else image(booster[floor(spriteIndex%booster.length)], x, y);
 
     super.display();
   }
@@ -378,22 +409,18 @@ class Booster extends FriendlyTower {
 
 class OpponentTower extends Tower {
   int laneNum;
-  int speed, damage, damageSpeed, damageCooldown, worth;
+  int damage, damageSpeed, damageCooldown, worth;
+  float speed;
   int slowCooldown, freezeCooldown;
-  float indexAttack, indexWalk;
+  float indexAttack, indexWalk, indexWalkSpeed, indexAttackSpeed;
   boolean collision;
+  PImage[] spriteWalk, spriteAttack;
 
 
-  OpponentTower(int y, int laneNum_) {
-    super(width + 32, y, 13, 19);
-
+  OpponentTower(int y, int laneNum_, int opponentNum) {
+    super(y);
     laneNum = laneNum_;
-    speed = 1;
-    damage = 10;
-    damageSpeed = 70;
-    maxHealth = 100;
-    health = maxHealth;
-    worth = 200;
+    setStats(opponentNum);
   }
 
   void move() {
@@ -420,44 +447,113 @@ class OpponentTower extends Tower {
 
     if (!collision && freezeCooldown == 0) {
       if (slowCooldown > 0) {
-        if (frameCount%4 == 0) x--;
-      } else if (frameCount%2 == 0) x--;
+        x -= speed * .5;
+      } else {
+        x -= speed;
+      }
 
-      if (x < -40) {
+      if (x + offsetR < 0) {
         gameOver = true;
         gameMenu = true;
+        gameBegun = false;
       }
     }
-    
+
     if (freezeCooldown == 0) {
+      float indexSpeed;
+      if (collision) indexSpeed = indexAttackSpeed;
+      else indexSpeed = indexWalkSpeed;
 
       if (slowCooldown > 0) {
-        if (collision) indexAttack += 0.075;
-        else indexWalk += 0.03;
-      } else {
-        if (collision) indexAttack += 0.15;
-        else indexWalk += 0.06;
+        indexSpeed *= .5;
       }
 
-      if (indexAttack >= viking1Attack.length) indexAttack = 0;
-      if (indexWalk >= viking1Attack.length) indexWalk = 0;
+      if (collision) indexAttack += indexSpeed;
+      else indexWalk += indexSpeed;
+
+      if (indexAttack >= spriteAttack.length) indexAttack = 0;
+      if (indexWalk >= spriteWalk.length) indexWalk = 0;
     }
   }
 
   void display() {
+    displayHealth();
+
     if (freezeCooldown > 0) tint(150, 150, 255);
     else if (slowCooldown > 0) tint(200, 200, 255);
-    
-    if (collision) {
-      image(viking1Attack[floor(indexAttack)], x, y);
-    } else {
-      image(viking1Walk[floor(indexWalk)], x, y);
-    }
 
+    if (collision) image(spriteAttack[floor(indexAttack)], x, y);
+    else image(spriteWalk[floor(indexWalk)], x, y);
 
     noTint();
+  }
 
+  void setStats(int opponentNum) {
+    if (opponentNum == 0) {
+      //axeman
+      speed = .5;
+      damage = 10;
+      damageSpeed = 70;
+      maxHealth = 100;
+      worth = 200;
+      indexWalkSpeed = 0.05;
+      indexAttackSpeed = 0.15;
 
-    displayHealth();
+      x = width + int(37 * resizeFactor);
+      offsetL = int(21 * resizeFactor);
+      offsetR = int(19 * resizeFactor);
+
+      spriteWalk = axemanWalk;
+      spriteAttack = axemanAttack;
+    } else if (opponentNum == 1) {
+      //warrior
+      speed = .75;
+      damage = 15;
+      damageSpeed = 50;
+      maxHealth = 150;
+      worth = 200;
+      indexWalkSpeed = 0.06;
+      indexAttackSpeed = 0.12;
+      
+      x = width + int(39 * resizeFactor);
+      offsetL = int(26 * resizeFactor);
+      offsetR = int(19 * resizeFactor);
+      
+      spriteWalk = warriorWalk;
+      spriteAttack = warriorAttack;
+    } else if (opponentNum == 2) {
+      //shieldwall
+      speed = .3;
+      damage = 5;
+      damageSpeed = 100;
+      maxHealth = 300;
+      worth = 200;
+      indexWalkSpeed = 0.04;
+      indexAttackSpeed = 0.05;
+
+      x = width + int(59 * resizeFactor);
+      offsetL = int(59 * resizeFactor);
+      offsetR = int(13 * resizeFactor);
+      
+      spriteWalk = shieldwallWalk;
+      spriteAttack = shieldwallAttack;
+    } else if (opponentNum == 3) {
+      speed = 1.5;
+      damage = 5;
+      damageSpeed = 100;
+      maxHealth = 50;
+      worth = 200;
+      indexWalkSpeed = 0.08;
+      indexAttackSpeed = 0.08;
+
+      x = width + int(51 * resizeFactor);
+      offsetL = int(19 * resizeFactor);
+      offsetR = int(13 * resizeFactor);
+      
+      spriteWalk = berserkerWalk;
+      spriteAttack = berserkerAttack;
+    }
+
+    health = maxHealth;
   }
 }
