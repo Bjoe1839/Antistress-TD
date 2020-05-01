@@ -4,13 +4,15 @@ class Level {
   int opponentSpawnRate;
   int startFrame;
   int axemanChance, warriorChance, shieldwallChance;
-  
+  ArrayList<OpponentTower> opponentTowers;
+
   Button nextLevel;
 
   Level(int num_) {
     num = num_;
-    dur = 4;
+    dur = 20;
     cooldown = dur;
+    opponentTowers = new ArrayList<OpponentTower>();
 
     setStats();
   }
@@ -53,24 +55,34 @@ class Level {
   void opponentHandler() {
     //level
     if (!levelFinished) {
-      if (frameCount%60 == 0) {
-        cooldown -= .5;
+      if (cooldown > 0) {
+        if (frameCount%60 == 0) {
+          cooldown -= .5;
+          if (cooldown < 0) cooldown = 0;
+        }
       }
-      if (cooldown <= 0) {
-        cooldown = 0;
+      else {
         if (opponentTowers.size() == 0 && projectiles.size() == 0) {
-          if (num < 4) {
-            levelFinished = true;
-            nextLevel = new Button(int(width * .97), int(height * .95), int(width * .99), int(height * .99));
-          } else {
-            gameWon = true;
-            gameMenu = true;
-            gameBegun = false;
+          boolean animation = false;
+          for (Square[] squareRow : squares) for (Square square : squareRow) {
+            if (square.tower != null && square.tower.spriteIndex != 0 && square.tower.towerNum != 3) animation = true;
+          }
+          if (!animation) {
+            if (num < 4) {
+              abilityDragStatus = -1;
+              for (AbilityButton ab : abilityButtons) ab.cooldown = 0;
+              levelFinished = true;
+              nextLevel = new Button(int(width * .97), int(height * .95), int(width * .99), int(height * .99));
+            } else {
+              gameWon = true;
+              gameMenu = true;
+              gameBegun = false;
+            }
           }
         }
       }
 
-      if (frameCount%opponentSpawnRate == startFrame && cooldown > 0) {
+      if (frameCount % opponentSpawnRate == startFrame && cooldown > 0 || cooldown < dur * .1 && cooldown > 0 && frameCount % (opponentSpawnRate * .05) == 0) {
         //random lane
         int laneNum = int(random(5));
         int y = int((squares[0][laneNum].y1 + squares[0][laneNum].y2) * .5);
@@ -78,11 +90,10 @@ class Level {
         y += offset;
         int opponentNum;
 
-        int r = round(random(100));
+        int r = int(random(100));
         if (r < axemanChance) {
           opponentNum = 0;
-        }
-        else {
+        } else {
           r -= axemanChance;
           if (r < warriorChance) opponentNum = 1;
           else {
@@ -94,7 +105,6 @@ class Level {
           }
         }
         opponentTowers.add(new OpponentTower(y, laneNum, opponentNum));
-        
       }
       for (OpponentTower ot : opponentTowers) {
         ot.move();
@@ -110,9 +120,6 @@ class Level {
     nextLevel = null;
     levelFinished = false;
 
-    for (AbilityButton ab : abilityButtons) {
-      ab.cooldown = 0;
-    }
     startFrame = frameCount%opponentSpawnRate + 1;
   }
 
@@ -123,8 +130,9 @@ class Level {
     int x = round(map(cooldown, 0, dur, width * .8, width * .99));
     fill(0, 255, 0);
     rect(x, height * .87, width * .99, height * .92);
+    
 
-    textFont(mediumFont);
+    textSize(.012 * width);
     textAlign(RIGHT, TOP);
     fill(0);
     text("Level "+(num+1), width * .99, height * .92);

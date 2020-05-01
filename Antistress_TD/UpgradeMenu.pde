@@ -44,20 +44,20 @@ class UpgradeMenu {
       break;
     }
 
-    textFont(normalFont);
+    textSize(.009 * width);
     fill(0);
     textAlign(CORNER);
     text(text, x+7, y+22);
     
     textAlign(LEFT, BOTTOM);
-    textFont(smallFont);
+    textSize(.007 * width);
     
     if (upgradeButton != null) text("Opgrader", upgradeButton.x1, upgradeButton.y1);
     text("Sælg", sellButton.x1, sellButton.y1);
     
     textAlign(CENTER, CENTER);
     
-    textFont(normalFont);
+    textSize(.009 * width);
     
     if (upgradeButton != null) {
       
@@ -81,45 +81,11 @@ class UpgradeMenu {
 
       //sælgknap
     } else if (sellButton.collision()) {
-      sellPressed();
+      square.sellTower();
 
       //opgraderingsknap
     } else if (upgradeButton != null && upgradeButton.collision()) {
-      upgradePressed();
-    }
-  }
-  
-  void sellPressed() {
-    money += square.tower.actualWorth;
-    //hvis man sælger en booster skal de boostede felter opdateres
-    if (square.tower.towerNum == 3) {
-      square.updateBoost();
-    }
-    upgradeMenu.square.tower = null;
-    upgradeMenu = null;
-  }
-
-  void upgradePressed() {
-    if (money >= square.tower.upgradePrice) {
-      money -= square.tower.upgradePrice;
-      square.tower.upgraded = true;
-      square.tower.setStats(square.boostingStatus);
-      upgradeMenu = null;
-
-      if (square.tower.towerNum == 3) {
-        for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
-          int col = square.colNum + i;
-          int row = square.rowNum + j;
-
-          if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
-
-            squares[col][row].boostingStatus = 2;
-            if (squares[col][row].tower != null) {
-              squares[col][row].tower.setStats(squares[col][row].boostingStatus);
-            }
-          }
-        }
-      }
+      square.upgradeTower();
     }
   }
 }

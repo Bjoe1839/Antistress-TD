@@ -2,7 +2,7 @@ class Square {
   int x1, y1, x2, y2, colNum, rowNum;
   Button button;
   FriendlyTower tower;
-  int boostingStatus; //0=ikke boosted, 1=boosted, 2=boosted med opgraderet booster
+  int boostingStatus; //0=ikke boosted, 1=boosted, 2=boosted med opgraderet priest
 
   Square(int x1_, int y1_, int x2_, int y2_, int colNum_, int rowNum_) {
     x1 = x1_;
@@ -21,17 +21,14 @@ class Square {
   }
 
   void display() {
-    if (boostingStatus == 0) noFill();
-    else if (boostingStatus > 0) {
-      fill(255, 255, 230, 180);
+    if (boostingStatus > 0) {
       if (!gameMenu && random(1) < 0.01) {
         int x = int(random(x1, x2));
         int y = int(random(y1, y2));
         particles.add(new Particle(x, y));
       }
-    } else fill(255, 255, 230);
+    }
 
-    //rect(x1, y1, x2, y2);
 
     if (tower != null) {
       if (tower.health > 0) {
@@ -54,35 +51,25 @@ class Square {
       int x = int((x2 + x1) * .5);
       int y = int((y2 + y1) * .5);
 
+      tint(255, 50);
       switch(towerDragStatus%5) {
       case 0:
-        tint(255, 50);
         image(fighter[0], x, y);
-        noTint();
         break;
       case 1:
-        tint(255, 50);
         image(archer[0], x, y);
-        noTint();
         break;
       case 2:
-        fill(0, 0, 255, 50);
-        stroke(0, 50);
-        circle(x, y, 80);
-        stroke(0);
+        image(freezer[0], x, y);
         break;
       case 3:
-        tint(255, 50);
-        image(booster[0], x, y);
-        noTint();
+        image(priest[0], x, y);
         break;
       case 4:
-        fill(0, 50);
-        stroke(0, 50);
-        circle(x, y, 80);
-        stroke(0);
+        image(bomber[0], x, y);
         break;
       }
+      noTint();
     }
   }
 
@@ -101,12 +88,12 @@ class Square {
       tower = new Freezer(x, y, true, boostingStatus, rowNum);
       break;
     case 3:
-      tower = new Booster(x, y, true);
+      tower = new Priest(x, y, true);
       for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
         int col = colNum + i;
         int row = rowNum + j;
 
-        if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length)
+        if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
 
           if (squares[col][row].boostingStatus < 1) {
             squares[col][row].boostingStatus = 1;
@@ -114,10 +101,11 @@ class Square {
               squares[col][row].tower.setStats(squares[col][row].boostingStatus);
             }
           }
+        }
       }
       break;
     case 4:
-      tower = new Blaster(x, y, true, boostingStatus, rowNum);
+      tower = new Bomber(x, y, true, boostingStatus, rowNum);
       break;
     }
   }
@@ -132,6 +120,47 @@ class Square {
     rect(x1, y1, x2, y2);
   }
 
+  void boostColor() {
+    if (boostingStatus == 1) fill(255, 255, 150, 60);
+    else fill(255, 255, 150, 90);
+
+    rect(x1, y1, x2, y2);
+  }
+
+  void sellTower() {
+    money += tower.actualWorth;
+    //hvis man sælger en priest skal de boostede felter opdateres
+    if (tower.towerNum == 3) {
+      updateBoost();
+    }
+    tower = null;
+    upgradeMenu = null;
+  }
+
+  void upgradeTower() {
+    if (!tower.upgraded && money >= tower.upgradePrice) {
+      money -= tower.upgradePrice;
+      tower.upgraded = true;
+      tower.setStats(boostingStatus);
+      upgradeMenu = null;
+
+      if (tower.towerNum == 3) {
+        for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
+          int col = colNum + i;
+          int row = rowNum + j;
+
+          if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
+
+            squares[col][row].boostingStatus = 2;
+            if (squares[col][row].tower != null) {
+              squares[col][row].tower.setStats(squares[col][row].boostingStatus);
+            }
+          }
+        }
+      }
+    }
+  }
+
   void updateBoost() {
     for (int i = -1; i < 2; i++) for (int j = -1; j < 2; j++) {
       int col = colNum + i;
@@ -139,7 +168,7 @@ class Square {
       if (col >= 0 && row >= 0 && col < squares.length && row < squares[0].length) {
 
         if (squares[col][row].boostingStatus > 0) {
-          //der tjekkes om der er en booster i rækkevidde, ellers slettes booststatusen
+          //der tjekkes om der er en priest i rækkevidde, ellers slettes booststatusen
           squares[col][row].boostingStatus = 0;
 
           for (int k = -1; k < 2; k++) for (int l = -1; l < 2; l++) {

@@ -7,7 +7,7 @@ class Projectile { //<>//
     x = x_;
     y = y_;
     laneNum = laneNum_;
-    rangeX = range*(width/squares.length-1) + x;
+    rangeX = range * (width / squares.length - 1) + x;
     upgraded = upgraded_;
   }
 
@@ -19,7 +19,7 @@ class Projectile { //<>//
       return true;
     }
 
-    for (OpponentTower ot : opponentTowers) {
+    for (OpponentTower ot : level.opponentTowers) {
       if (ot.laneNum == laneNum && ot.x + ot.offsetR >= x - size/2 && ot.x - ot.offsetL <= x + size/2) {
 
         hitOpponent(ot);
@@ -40,10 +40,12 @@ class Projectile { //<>//
     opponent.health -= damage;
     if (opponent.health <= 0) {
       money += opponent.worth;
-      opponentTowers.remove(opponent);
+      level.opponentTowers.remove(opponent);
     }
   }
 }
+
+
 
 class FighterProjectile extends Projectile {
 
@@ -53,8 +55,7 @@ class FighterProjectile extends Projectile {
     if (!upgraded) {
       size = fighterProjectile.width;
       speed = 5;
-    }
-    else {
+    } else {
       size = fighterlv2Projectile.width;
       speed = 6;
     }
@@ -87,12 +88,13 @@ class ArcherProjectile extends Projectile {
   }
 }
 
+
 class FreezerProjectile extends Projectile {
-  //roterende snefnug/snebolde
   int slowDur, freezeDur;
+  float angle;
   FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
-    speed = 4;
+    speed = 8;
     damage = 0;
     size = 10;
     slowDur = slowDur_;
@@ -100,38 +102,58 @@ class FreezerProjectile extends Projectile {
   }
 
   void display() {
-    fill(0, 0, 255);
-    noStroke();
-    circle(x, y, size);
-    stroke(0);
+    if (!upgraded) {
+      angle += .3;
+
+      pushMatrix();
+      translate(x, y);
+      rotate(angle);
+      image(freezerProjectile, 0, 0);
+      popMatrix();
+    } else image(freezerlv2Projectile, x, y);
   }
 
   void hitOpponent(OpponentTower opponent) {
+    super.hitOpponent(opponent);
+    
     opponent.slowCooldown += slowDur;
     opponent.freezeCooldown += freezeDur;
   }
 }
 
-class BlasterProjectile extends Projectile {
+class BomberProjectile extends Projectile {
   int explosionSize;
+  float angle;
   //roterende bomber/ikke-roterende raketter
-  BlasterProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+  BomberProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
-    speed = 3;
+    speed = 5;
     damage = damage_;
     size = 30;
     explosionSize = 250;
   }
 
   void hitOpponent(OpponentTower opponent) {
-    for (int i = opponentTowers.size()-1; i >= 0; i--) {
-      if (dist(x, y, opponentTowers.get(i).x, opponentTowers.get(i).y) < explosionSize) {
-        opponentTowers.get(i).health -= damage;
-        if (opponentTowers.get(i).health <= 0) {
-          money += opponentTowers.get(i).worth;
-          opponentTowers.remove(opponentTowers.get(i));
+    for (int i = level.opponentTowers.size()-1; i >= 0; i--) {
+      if (dist(x, y, level.opponentTowers.get(i).x, level.opponentTowers.get(i).y) < explosionSize) {
+        level.opponentTowers.get(i).health -= damage;
+        if (level.opponentTowers.get(i).health <= 0) {
+          money += level.opponentTowers.get(i).worth;
+          level.opponentTowers.remove(level.opponentTowers.get(i));
         }
       }
     }
+  }
+
+  void display() {
+    angle += .15;
+
+    pushMatrix();
+    translate(x, y);
+    rotate(angle);
+
+    if (!upgraded) image(bomberProjectile, 0, 0);
+    else image(bomberlv2Projectile, 0, 0);
+    popMatrix();
   }
 }

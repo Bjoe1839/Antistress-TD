@@ -34,37 +34,36 @@ class DragButton extends Button {
   }
 
   void display(int status) {
+    //'skygge' under knappen
+    noStroke();
+    fill(100, 50, 0);
+    rect(x1 + 2, y1 + 6, x2 + 2, y2 + 6, 15);
+    stroke(0);
 
-    //status 0 er hvid, status 1 er grå, status 2 er har ikke råd og status 3 er trykket ned
+    //status 0 er almidelig, status 1 er holder over, status 2 er har ikke råd og status 3 er trykket ned
     if (status < 3) {
-      fill(50);
-      rect(x1+2, y1+6, x2+2, y2+6, 15);
-
       if (status == 0 || status == 2) fill(255);
       else fill(240);
 
       rect(x1, y1, x2, y2, 15);
     } else {
-      fill(50);
-      rect(x1+2, y1+6, x2+2, y2+6, 15);
-
       fill(240);
-      rect(x1+1, y1+3, x2+1, y2+3, 15);
+      rect(x1 + 1, y1 + 3, x2 + 1, y2 + 3, 15);
     }
 
 
     //beskrivelses boks
     if (status == 1 || status == 2) {
       if (status == 1) fill(255, 200);
-      else fill(255, 200, 200, 200); //hvis man ikke har råd til det farves feltet rødt
+      else fill(255, 180, 180, 200);
 
 
       int len = int(width * 0.07);
-      rect(mouseX-len, y1-220, mouseX+len, y1-10, 15);
+      rect(mouseX - len, y1 - 220, mouseX + len, y1 - 10, 15);
       fill(0);
-      textFont(normalFont);
+      textSize(.009 * width);
       textAlign(CORNER);
-      text(text, mouseX-len+7, y1-200);
+      text(text, mouseX - len + 7, y1 - 200);
       textAlign(CENTER, CENTER);
     }
     fill(0);
@@ -87,29 +86,29 @@ class TowerButton extends DragButton {
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: Q";
       price = 100;
       towerImg = fighter[0].copy();
-      towerImg.resize(0, int(resizeFactor * towerImg.height * .5)); //done
       break;
     case 1:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: W";
       price = 100;
       towerImg = archer[0].copy();
-      towerImg.resize(0, int(resizeFactor * towerImg.height * .5));
       break;
     case 2:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: E";
       price = 150;
+      towerImg = freezer[0].copy();
       break;
     case 3:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: R";
       price = 250;
-      towerImg = booster[0].copy();
-      towerImg.resize(0, int(resizeFactor * towerImg.height * .5));
+      towerImg = priest[0].copy();
       break;
     case 4:
       text += "Dette er et tårn. Tester teksten.\nWow det er på flere linjer.\nDet her tårn kan skyde.\n \nGenvejstast: T";
       price = 300;
+      towerImg = bomber[0].copy();
       break;
     }
+    towerImg.resize(0, int(resizeY * towerImg.height * .5));
   }
 
   void display(int status) {
@@ -126,16 +125,13 @@ class TowerButton extends DragButton {
 
     if (money < price) fill(200, 0, 0);
     else fill(0, 200, 0);
-    textFont(mediumFont);
+    textSize(.012 * width);
 
     textAlign(RIGHT, CENTER);
-    text(price+"$", x2-5, y);
+    text(price+"$", x2 - 5, y);
     textAlign(CENTER, CENTER);
 
-    //done
-    if (towerImg != null) {
-      image(towerImg, x, y);
-    }
+    image(towerImg, x, y);
   }
 }
 
@@ -173,22 +169,25 @@ class AbilityButton extends DragButton {
   void display(int status) {
     super.display(status);
 
-    int x = int((x2+x1)*.5);
-    int y = int((y2+y1)*.5);
+    if (cooldown > 0 && !gameMenu) cooldown--;
+
+    int x = int((x2 + x1) * .5);
+    int y = int((y2 + y1) * .5);
 
     if (status == 3) {
       x++;
       y += 3;
     }
-    if (cooldown == 0) triangle(x-15, y+15, x+15, y+15, x, y-15);
+    if (cooldown == 0) image(potion, x, y);
     else {
-      fill(200, 0, 0);
-      triangle(x-15, y+15, x+15, y+15, x, y-15);
+      tint(255, 150, 150);
+      image(potion, x, y);
+      noTint();
 
       //cooldownbar
       int barX = int(map(cooldown, 0, cooldownDur, x1, x2));
       fill(0, 0, 200);
-      rect(x1, y2+11, barX, y2+16, 3);
+      rect(x1, y2 + 11, barX, y2 + 16, 3);
     }
   }
 }
