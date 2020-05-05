@@ -143,6 +143,7 @@ class BomberProjectile extends Projectile {
         }
       }
     }
+    particles.add(new Explosion(x, y, int(explosionSize * .9)));
   }
 
   void display() {

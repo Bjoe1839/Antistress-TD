@@ -140,6 +140,7 @@ class Square {
   void upgradeTower() {
     if (!tower.upgraded && money >= tower.upgradePrice) {
       money -= tower.upgradePrice;
+      
       tower.upgraded = true;
       tower.setStats(boostingStatus);
       upgradeMenu = null;

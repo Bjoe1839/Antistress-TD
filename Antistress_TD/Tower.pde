@@ -325,6 +325,8 @@ class Freezer extends ShooterTower {
 
 
 class Bomber extends ShooterTower {
+  boolean ability;
+  
   Bomber(int x, int y, boolean placed, int boostingStatus, int laneNum) {
     super(x, y, 35, 58, placed, 4, laneNum);
     setStats(boostingStatus);
@@ -339,7 +341,11 @@ class Bomber extends ShooterTower {
   }
 
   void shoot() {
-    projectiles.add(new BomberProjectile(int(x + offsetR), y + int(7 * resizeY), damage, laneNum, range, upgraded));
+    if (!ability) projectiles.add(new BomberProjectile(int(x + offsetR), y + int(7 * resizeY), damage, laneNum, range, upgraded));
+    else {
+      projectiles.add(new BomberProjectile(int(x + offsetR), y + int(7 * resizeY), damage*3, laneNum, range*2, upgraded));
+      ability = false;
+    }
   }
 
 
@@ -360,6 +366,11 @@ class Bomber extends ShooterTower {
     }
     super.setStats(boostingStatus);
   }
+  
+  void ability() {
+    ability = true;
+    if (spriteIndex == 0) spriteIndex = 1;
+  }
 }
 
 
@@ -368,7 +379,7 @@ class Priest extends FriendlyTower {
 
   Priest(int x, int y, boolean placed) {
     super(x, y, 27, 19, placed, 3);
-    setStats();
+    setStats(0);
     health = maxHealth;
     upgradePrice = 200;
   }
@@ -387,7 +398,7 @@ class Priest extends FriendlyTower {
     }
   }
 
-  void setStats() {
+  void setStats(int boostingStatus) {
     if (!upgraded) {
       sprite = priest;
       worth = 200;
@@ -398,6 +409,16 @@ class Priest extends FriendlyTower {
       worth = 300;
       actualWorth = int(map(health, 0, maxHealth, 0, worth));
       //add
+    }
+  }
+  
+  void ability() {
+    //heler alle tårne med 50%
+    for (Square[] squareRow : squares) for (Square square : squareRow) {
+      if (square.tower != null) {
+        square.tower.health += square.tower.maxHealth * .5;
+        if (square.tower.health > square.tower.maxHealth) square.tower.health = square.tower.maxHealth;
+      }
     }
   }
 }
@@ -465,9 +486,10 @@ class OpponentTower extends Tower {
 
       else if (indexAttack >= spriteAttack.length-1 && indexAttack < spriteAttack.length-1 + indexSpeed ||
         opponentNum == 3 && indexAttack >= spriteAttack.length-2 && indexAttack < spriteAttack.length-2 + indexSpeed) {
-
-        collisionTower.tower.health -= damage;
-        collisionTower.tower.actualWorth = int(map(collisionTower.tower.health, 0, collisionTower.tower.maxHealth, 0, collisionTower.tower.worth));
+        if (collisionTower != null) {
+          collisionTower.tower.health -= damage;
+          collisionTower.tower.actualWorth = int(map(collisionTower.tower.health, 0, collisionTower.tower.maxHealth, 0, collisionTower.tower.worth));
+        }
       }
 
       if (indexWalk >= spriteWalk.length) indexWalk = 0;

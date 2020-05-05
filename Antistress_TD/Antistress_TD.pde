@@ -1,4 +1,4 @@
-//fjern fps counter
+//eksplosion
 
 import processing.sound.*;
 
@@ -10,7 +10,7 @@ int money;
 float resizeX, resizeY;
 
 boolean gameOver, gameWon, levelFinished, gameBegun;
-boolean gameMenu, frontPage;
+boolean gameMenu, frontPage, howToPlay;
 boolean cursorHand;
 
 //sprites
@@ -19,7 +19,7 @@ PImage[] fighter, fighterlv2, archer, archerlv2, freezer, freezerlv2, priest, pr
 
 PImage fighterProjectile, fighterlv2Projectile, archerProjectile, archerlv2Projectile, freezerProjectile, freezerlv2Projectile, bomberProjectile, bomberlv2Projectile;
 
-PImage upgradeIcon, particle, potion, shadow, background;
+PImage upgradeIcon, particle, explosion, potion, shadow, background, howToPlayScreen;
 
 ArrayList<Projectile> projectiles;
 ArrayList<Particle> particles;
@@ -30,7 +30,7 @@ Square[][] squares;
 
 UpgradeMenu upgradeMenu;
 Level level;
-Button continueGame, newGame, howToPlay, exit, toFrontPage;
+Button continueGame, newGame, howToPlayButton, exit, toFrontPage;
 
 
 void setup() {
@@ -188,11 +188,8 @@ void draw() {
       if (gameOver) text("GAME OVER", width/2, height/2);
       if (gameWon) text("Du vandt!", width/2, height/2);
     }
+    text(round(frameRate), 20, 20);
 
-    //fps
-    textSize(.009 * width);
-    fill(0);
-    text(round(frameRate), 20, 15);
   }
   //cursor
   if (hovering()) {
@@ -244,15 +241,21 @@ void mousePressed() {
       if (frontPage) frontPage = false;
       else gameMenu = false;
     }
-    if (frontPage) {
-      if (newGame.collision()) {
-        gameMenu = false;
-        frontPage = false;
-        startUp();
-      } else if (exit.collision()) {
-        exit();
-      }
-    } else if (toFrontPage.collision()) frontPage = true;
+    if (!howToPlay) {
+      if (frontPage) {
+        if (newGame.collision()) {
+          gameMenu = false;
+          frontPage = false;
+          startUp();
+        } else if (howToPlayButton.collision()) {
+          howToPlay = true;
+        } else if (exit.collision()) {
+          exit();
+        }
+      } else if (toFrontPage.collision()) frontPage = true;
+    } else {
+      howToPlay = false;
+    }
   }
 }
 
@@ -454,7 +457,7 @@ void initVariables() {
   continueGame = new Button(x1, hei * 5, x2, hei * 6);
   newGame = new Button(x1, hei * 7, x2, hei * 8);
   toFrontPage = new Button(x1, hei * 7, x2, hei * 8);
-  howToPlay = new Button(x1, hei * 9, x2, hei * 10);
+  howToPlayButton = new Button(x1, hei * 9, x2, hei * 10);
   exit = new Button(x1, hei * 11, x2, hei * 12);
 
   loadImgs();
@@ -531,11 +534,14 @@ void loadImgs() {
 
   upgradeIcon = loadImage("Diverse/Upgrade_icon.png");
   particle = loadImage("Diverse/Particle.png");
+  explosion = loadImage("Diverse/Explosion.png");
   potion = loadImage("Diverse/Potion.png");
   potion.resize(0, int(resizeY * potion.height));
   shadow = loadImage("Diverse/Shadow.png");
   background = loadImage("Diverse/Background.png");
   background.resize(width, height);
+  howToPlayScreen = loadImage("Diverse/HowToPlay.png");
+  howToPlayScreen.resize(width, height);
 }
 
 
@@ -559,7 +565,7 @@ PImage[] cutSpriteSheet(PImage spriteSheet, int colCount, int rowCount, int spri
 
 
 void startUp() {
-  towerDragStatus= -1;
+  towerDragStatus = -1;
   abilityDragStatus = -1;
   money = 200;
   level = new Level(0);
@@ -618,48 +624,52 @@ boolean hovering() {
     } else if (upgradeMenu.sellButton.collision() || upgradeMenu.exitButton.collision() || upgradeMenu.upgradeButton != null && upgradeMenu.upgradeButton.collision()) {
       return true;
     }
-  } else {
-    if (continueGame.collision() && gameBegun || newGame.collision() && frontPage || howToPlay.collision() && frontPage || exit.collision() && frontPage || toFrontPage.collision() && !frontPage) {
+  } else if (!howToPlay) {
+    if (continueGame.collision() && gameBegun || newGame.collision() && frontPage || howToPlayButton.collision() && frontPage || exit.collision() && frontPage || toFrontPage.collision() && !frontPage) {
       return true;
     }
-  }
+  } else return true;
   return false;
 }
 
 
 
 void displayGameMenu () {
-  if (!frontPage) {
-    fill(0, 150);
-    rect(0, 0, width, height);
+  if (!howToPlay) {
+    if (!frontPage) {
+      fill(0, 150);
+      rect(0, 0, width, height);
+    } else {
+      background(200, 255, 255);
+    }
+
+
+    textSize(.021 * width);
+    fill(0);
+    text("Antistress-TD", width * .5, height * .17);
+    textAlign(CENTER, CENTER);
+
+    textSize(.012 * width);
+    if (!gameBegun) continueGame.display("Fortsæt spil", color(255, 125), 125);
+    else {
+      if (!continueGame.collision()) continueGame.display("Fortsæt spil", color(255), 255);
+      else continueGame.display("Fortsæt spil", color(240), 255);
+    }
+
+    if (frontPage) {
+      if (!newGame.collision()) newGame.display("Start nyt spil", color(255), 255);
+      else newGame.display("Start nyt spil", color(240), 255);
+
+      if (!howToPlayButton.collision()) howToPlayButton.display("Hvordan man spiller", color(255), 255);
+      else howToPlayButton.display("Hvordan man spiller", color(240), 255);
+
+      if (!exit.collision()) exit.display("Afslut", color(255), 255);
+      else exit.display("Afslut", color(240), 255);
+    } else {
+      if (!toFrontPage.collision()) toFrontPage.display("Tilbage til forsiden", color(255), 255);
+      else toFrontPage.display("Tilbage til forsiden", color(240), 255);
+    }
   } else {
-    background(200, 255, 255);
-  }
-
-
-  textSize(.021 * width);
-  fill(0);
-  text("Antistress-TD", width * .5, height * .17);
-  textAlign(CENTER, CENTER);
-
-  textSize(.012 * width);
-  if (!gameBegun) continueGame.display("Fortsæt spil", color(255, 125), 125);
-  else {
-    if (!continueGame.collision()) continueGame.display("Fortsæt spil", color(255), 255);
-    else continueGame.display("Fortsæt spil", color(240), 255);
-  }
-
-  if (frontPage) {
-    if (!newGame.collision()) newGame.display("Start nyt spil", color(255), 255);
-    else newGame.display("Start nyt spil", color(240), 255);
-
-    if (!howToPlay.collision()) howToPlay.display("Hvordan man spiller", color(255), 255);
-    else howToPlay.display("Hvordan man spiller", color(240), 255);
-
-    if (!exit.collision()) exit.display("Afslut", color(255), 255);
-    else exit.display("Afslut", color(240), 255);
-  } else {
-    if (!toFrontPage.collision()) toFrontPage.display("Tilbage til forsiden", color(255), 255);
-    else toFrontPage.display("Tilbage til forsiden", color(240), 255);
+    background(howToPlayScreen);
   }
 }
