@@ -125,12 +125,12 @@ class BomberProjectile extends Projectile {
   int explosionSize;
   float angle;
   //roterende bomber/ikke-roterende raketter
-  BomberProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded) {
+  BomberProjectile(int x, int y, int damage_, int laneNum, int range, boolean upgraded, int explosionSize_) {
     super(x, y, laneNum, range, upgraded);
     speed = 5;
     damage = damage_;
     size = 30;
-    explosionSize = 250;
+    explosionSize = explosionSize_;
   }
 
   void hitOpponent(OpponentTower opponent) {
@@ -143,7 +143,7 @@ class BomberProjectile extends Projectile {
         }
       }
     }
-    particles.add(new Explosion(x, y, int(explosionSize * .9)));
+    particles.add(new Explosion(x, y, int(explosionSize * .75)));
   }
 
   void display() {
