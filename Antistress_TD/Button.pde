@@ -107,7 +107,7 @@ class TowerButton extends DragButton {
       towerImg = bomber[0].copy();
       break;
     }
-    towerImg.resize(0, int(resizeY * towerImg.height * .5));
+    towerImg.resize(0, int(towerImg.height * .5 * resizeY));
   }
 
   void display(int status) {

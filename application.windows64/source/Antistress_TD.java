@@ -51,7 +51,6 @@ Button continueGame, newGame, howToPlayButton, exit, toFrontPage;
 
 public void setup() {
   
-  //size(1600, 900);
 
   //loading skærm
   background(0);
@@ -534,15 +533,24 @@ public void loadImgs() {
 
   //projektiler
   fighterProjectile = loadImage("Projectiles/Fighter_projectile.png");
+  fighterProjectile.resize(PApplet.parseInt(fighterProjectile.width * resizeX), 0);
   fighterlv2Projectile = loadImage("Projectiles/Fighter_upgraded_projectile.png");
+  fighterlv2Projectile.resize(PApplet.parseInt(fighterlv2Projectile.width * resizeX), 0);
   archerProjectile = loadImage("Projectiles/Archer_projectile.png");
+  archerProjectile.resize(PApplet.parseInt(archerProjectile.width * resizeX), 0);
   archerlv2Projectile = loadImage("Projectiles/Archer_upgraded_projectile.png");
+  archerlv2Projectile.resize(PApplet.parseInt(archerlv2Projectile.width * resizeX), 0);
   freezerProjectile = loadImage("Projectiles/Freezer_projectile.png");
+  freezerProjectile.resize(PApplet.parseInt(freezerProjectile.width * resizeX), 0);
   freezerlv2Projectile = loadImage("Projectiles/Freezer_upgraded_projectile.png");
+  freezerlv2Projectile.resize(PApplet.parseInt(freezerlv2Projectile.width * resizeX), 0);
   bomberProjectile = loadImage("Projectiles/Bomber_projectile.png");
+  bomberProjectile.resize(PApplet.parseInt(bomberProjectile.width * resizeX), 0);
   bomberlv2Projectile = loadImage("Projectiles/Bomber_upgraded_projectile.png");
+  bomberlv2Projectile.resize(PApplet.parseInt(bomberlv2Projectile.width * resizeX), 0);
 
   upgradeIcon = loadImage("Diverse/Upgrade_icon.png");
+  upgradeIcon.resize(PApplet.parseInt(resizeX * upgradeIcon.width), 0);
   particle = loadImage("Diverse/Particle.png");
   explosion = loadImage("Diverse/Explosion.png");
   potion = loadImage("Diverse/Potion.png");
@@ -794,7 +802,7 @@ class TowerButton extends DragButton {
       towerImg = bomber[0].copy();
       break;
     }
-    towerImg.resize(0, PApplet.parseInt(resizeY * towerImg.height * .5f));
+    towerImg.resize(0, PApplet.parseInt(towerImg.height * .5f * resizeY));
   }
 
   public void display(int status) {
