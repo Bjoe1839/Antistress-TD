@@ -263,7 +263,7 @@ class Archer extends ShooterTower {
       sprite = archerlv2;
       worth = 205;
       actualWorth = int(map(health, 0, maxHealth, 0, worth));
-      damage = 5;
+      damage = 6;
       shotSpeed = 85;
     }
     super.setStats(boostingStatus);

@@ -52,8 +52,8 @@ class Level {
     case 5:
       opponentSpawnRate = 100;
       axemanChance = 0;
-      warriorChance = 25;
-      shieldwallChance = 45;
+      warriorChance = 35;
+      shieldwallChance = 30;
       break;
     }
   }
