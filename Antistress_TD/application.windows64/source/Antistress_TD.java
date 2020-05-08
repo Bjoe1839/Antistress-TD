@@ -1176,10 +1176,10 @@ class ArcherProjectile extends Projectile {
 class FreezerProjectile extends Projectile {
   int slowDur, freezeDur;
   float angle;
-  FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
+  FreezerProjectile(int x, int y, int damage_, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
     speed = 8;
-    damage = 0;
+    damage = damage_;
     size = 10;
     slowDur = slowDur_;
     freezeDur = freezeDur_;
@@ -1630,7 +1630,6 @@ class Fighter extends ShooterTower {
       maxHealth = 100;
       shotSpeed = 180;
       damage = 15;
-      range = 2;
     } else {
       sprite = fighterlv2;
       worth = 175;
@@ -1643,6 +1642,8 @@ class Fighter extends ShooterTower {
       maxHealth = 150;
       health = PApplet.parseInt(map(health, 0, temp, 0, maxHealth));
     }
+    range = 2;
+    
     super.setStats(boostingStatus);
   }
 
@@ -1691,7 +1692,6 @@ class Archer extends ShooterTower {
       maxHealth = 100;
       shotSpeed = 100;
       damage = 3;
-      range = 9;
     } else {
       sprite = archerlv2;
       worth = 205;
@@ -1699,6 +1699,7 @@ class Archer extends ShooterTower {
       damage = 6;
       shotSpeed = 85;
     }
+    range = 9;
     super.setStats(boostingStatus);
   }
 
@@ -1724,7 +1725,7 @@ class Freezer extends ShooterTower {
   }
 
   public void shoot() {
-    projectiles.add(new FreezerProjectile(PApplet.parseInt(x + offsetR), y - PApplet.parseInt(37 * resizeY), laneNum, range, slowDur, freezeDur, upgraded));
+    projectiles.add(new FreezerProjectile(PApplet.parseInt(x + offsetR), y - PApplet.parseInt(37 * resizeY), damage, laneNum, range, slowDur, freezeDur, upgraded));
   }
 
   public void setStats(int boostingStatus) {
@@ -1735,7 +1736,6 @@ class Freezer extends ShooterTower {
       maxHealth = 125;
       shotSpeed = 240;
       damage = 0;
-      range = 4;
       slowDur = 60;
       freezeDur = 0;
     } else {
@@ -1746,6 +1746,8 @@ class Freezer extends ShooterTower {
       actualWorth = PApplet.parseInt(map(health, 0, maxHealth, 0, worth));
       damage = 12;
     }
+    range = 5;
+    
     super.setStats(boostingStatus);
   }
 
@@ -1793,7 +1795,6 @@ class Bomber extends ShooterTower {
       maxHealth = 175;
       shotSpeed = 300;
       damage = 15;
-      range = 4;
       explosionSize = PApplet.parseInt(250 * resizeX);
     } else {
       sprite = bomberlv2;
@@ -1802,6 +1803,7 @@ class Bomber extends ShooterTower {
       explosionSize = PApplet.parseInt(300 * resizeX);
       damage = 20;
     }
+    range = 4;
     super.setStats(boostingStatus);
   }
   

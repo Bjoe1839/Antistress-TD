@@ -92,10 +92,10 @@ class ArcherProjectile extends Projectile {
 class FreezerProjectile extends Projectile {
   int slowDur, freezeDur;
   float angle;
-  FreezerProjectile(int x, int y, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
+  FreezerProjectile(int x, int y, int damage_, int laneNum, int range, int slowDur_, int freezeDur_, boolean upgraded) {
     super(x, y, laneNum, range, upgraded);
     speed = 8;
-    damage = 0;
+    damage = damage_;
     size = 10;
     slowDur = slowDur_;
     freezeDur = freezeDur_;
