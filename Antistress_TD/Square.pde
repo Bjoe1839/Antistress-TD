@@ -116,7 +116,7 @@ class Square {
   }
 
   void lighten() {
-    fill(255, 150);
+    fill(255, 100);
     rect(x1, y1, x2, y2);
   }
 

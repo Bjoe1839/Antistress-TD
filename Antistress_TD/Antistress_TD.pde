@@ -10,6 +10,7 @@ float resizeX, resizeY;
 boolean gameOver, gameWon, levelFinished, gameBegun;
 boolean gameMenu, frontPage, howToPlay;
 boolean cursorHand;
+boolean muted;
 
 //sprites
 PImage[] fighter, fighterlv2, archer, archerlv2, freezer, freezerlv2, priest, priestlv2, bomber, bomberlv2,
@@ -17,7 +18,7 @@ PImage[] fighter, fighterlv2, archer, archerlv2, freezer, freezerlv2, priest, pr
 
 PImage fighterProjectile, fighterlv2Projectile, archerProjectile, archerlv2Projectile, freezerProjectile, freezerlv2Projectile, bomberProjectile, bomberlv2Projectile;
 
-PImage upgradeIcon, particle, explosion, potion, shadow, background, howToPlayScreen, frontPageScreen, logo;
+PImage upgradeIcon, muteIcon, particle, explosion, potion, shadow, background, howToPlayScreen, frontPageScreen, logo;
 
 ArrayList<Projectile> projectiles;
 ArrayList<Particle> particles;
@@ -29,6 +30,7 @@ Square[][] squares;
 UpgradeMenu upgradeMenu;
 Level level;
 Button continueGame, newGame, howToPlayButton, exit, toFrontPage;
+Button muteButton;
 
 
 void setup() {
@@ -149,6 +151,18 @@ void draw() {
         break;
       case 3:
         image(priest[0], mouseX, mouseY);
+        
+        //markerer 3*3 felter som bliver boostede
+        for (int i = 0; i < squares.length; i++) for (int j = 0; j < squares[0].length; j++) {
+          if (squares[i][j].button.collision()) {
+            for (int x = -1; x < 2; x++) for (int y = -1; y < 2; y++) {
+              if (i + x >= 0 && i + x < squares.length && j + y >= 0 && j + y < squares[0].length) {
+                squares[i + x][j + y].lighten();
+              }
+            }
+            break;
+          }
+        }
         break;
       case 4:
         image(bomber[0], mouseX, mouseY);
@@ -245,6 +259,12 @@ void mousePressed() {
       } else if (toFrontPage.collision()) frontPage = true;
     } else {
       howToPlay = false;
+    }
+    if (frontPage && muteButton.collision()) {
+      if (muted) music.amp(0.4);
+      else music.amp(0.0);
+      
+      muted = !muted;
     }
   }
 }
@@ -450,6 +470,8 @@ void initVariables() {
   toFrontPage = new Button(x1, hei * 10, x2, hei * 11);
   howToPlayButton = new Button(x1, hei * 12, x2, hei * 13);
   exit = new Button(x1, hei * 14, x2, hei * 15);
+  
+  muteButton = new Button(int(width * .013), int(height * .933), int(width * .042), int(height * .982));
 
   loadImgs();
 }
@@ -533,6 +555,8 @@ void loadImgs() {
 
   upgradeIcon = loadImage("Diverse/Upgrade_icon.png");
   upgradeIcon.resize(int(resizeX * upgradeIcon.width), 0);
+  muteIcon = loadImage("Diverse/Sound_icon.png");
+  muteIcon.resize(int(resizeX * muteIcon.width), int(resizeY * muteIcon.height));
   particle = loadImage("Diverse/Particle.png");
   explosion = loadImage("Diverse/Explosion.png");
   potion = loadImage("Diverse/Potion.png");
@@ -633,6 +657,9 @@ boolean hovering() {
     if (continueGame.collision() && gameBegun || newGame.collision() && frontPage || howToPlayButton.collision() && frontPage || exit.collision() && frontPage || toFrontPage.collision() && !frontPage) {
       return true;
     }
+    else if (frontPage && muteButton.collision()) {
+      return true;
+    }
   } else return true;
   return false;
 }
@@ -667,6 +694,14 @@ void displayGameMenu () {
 
       if (!exit.collision()) exit.display("Afslut", color(255), 255);
       else exit.display("Afslut", color(240), 255);
+      
+      muteButton.display("", color(230, 250, 255), 255);
+      image(muteIcon, (muteButton.x1 + muteButton.x2) * .5, (muteButton.y1 + muteButton.y2) * .5);
+      if (muted) {
+        stroke(255, 0, 0);
+        line(muteButton.x2, muteButton.y1, muteButton.x1, muteButton.y2);
+        stroke(0);
+      }
     } else {
       if (!toFrontPage.collision()) toFrontPage.display("Tilbage til forsiden", color(255), 255);
       else toFrontPage.display("Tilbage til forsiden", color(240), 255);

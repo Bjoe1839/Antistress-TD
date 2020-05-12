@@ -18,7 +18,7 @@ class UpgradeMenu {
   }
 
   void display() {
-    fill(200);
+    fill(180, 220, 230);
     rect(x, y, x+250, y+200, 10);
     
     switch(square.tower.towerNum) {
@@ -28,19 +28,19 @@ class UpgradeMenu {
       break;
     case 1:
       if (!square.tower.upgraded) text = "Opgrader til armbrøst\nfor at skyde hurtigere og\nskade lidt mere.";
-      else text = "";
+      else text = "Dette tårn er opgraderet";
       break;
     case 2:
       if (!square.tower.upgraded) text = "Opgrader til at skyde\nmed istapper for at fryse\ntårnet og skade lidt.";
-      else text = "Dette tårn er værd: "+square.tower.actualWorth;
+      else text = "Dette tårn er opgraderet";
       break;
     case 3:
       if (!square.tower.upgraded) text = "Opgrader til biskop for\nat booste tårnene endnu\nmere.";
-      else text = "";
+      else text = "Dette tårn er opgraderet";
       break;
     case 4:
       if (!square.tower.upgraded) text = "Opgrader til\nbombeskyder for at skade\nmere i et større område.";
-      else text = "";
+      else text = "Dette tårn er opgraderet";
       break;
     }
 
