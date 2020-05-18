@@ -1,10 +1,10 @@
-class Projectile { //<>// //<>//
+class Projectile { //<>//
   int x, y, rangeX, laneNum;
   int speed, damage, size;
   boolean upgraded;
 
   Projectile(int x_, int y_, int offset, int laneNum_, int range, boolean upgraded_) {
-    x = x_ + offset;
+    x = x_ + offset; //skal spawne på højre side af spriten
     y = y_;
     laneNum = laneNum_;
     rangeX = int(range * (width / squares.length - 1) + (width / squares.length - 1) * .5) + x - offset;
@@ -20,9 +20,10 @@ class Projectile { //<>// //<>//
     }
 
     for (OpponentTower ot : level.opponentTowers) {
+      //om projektilet rammer en modstander
       if (ot.laneNum == laneNum && ot.x + ot.offsetR >= x - size/2 && ot.x - ot.offsetL <= x + size/2) {
 
-        hitOpponent(ot);
+        opponentHit(ot);
 
         projectiles.remove(this);
         return true;
@@ -36,8 +37,9 @@ class Projectile { //<>// //<>//
     circle(x, y, size);
   }
 
-  void hitOpponent(OpponentTower opponent) {
+  void opponentHit(OpponentTower opponent) {
     opponent.health -= damage;
+    
     if (opponent.health <= 0) {
       money += opponent.worth;
       level.opponentTowers.remove(opponent);
@@ -68,7 +70,6 @@ class FighterProjectile extends Projectile {
 }
 
 class ArcherProjectile extends Projectile {
-
   ArcherProjectile(int x, int y, int offset, int damage_, int laneNum, int range, boolean upgraded) {
     super(x, y, offset, laneNum, range, upgraded);
 
@@ -103,6 +104,7 @@ class FreezerProjectile extends Projectile {
 
   void display() {
     if (!upgraded) {
+      //skal rotere
       if (!gameMenu) angle += .3;
 
       pushMatrix();
@@ -113,9 +115,10 @@ class FreezerProjectile extends Projectile {
     } else image(freezerlv2Projectile, x, y);
   }
 
-  void hitOpponent(OpponentTower opponent) {
-    super.hitOpponent(opponent);
-    
+  void opponentHit(OpponentTower opponent) {
+    super.opponentHit(opponent);
+
+    //gør modstandere langsommere
     opponent.slowCooldown += slowDur;
     opponent.freezeCooldown += freezeDur;
   }
@@ -132,10 +135,12 @@ class BomberProjectile extends Projectile {
     explosionSize = explosionSize_;
   }
 
-  void hitOpponent(OpponentTower opponent) {
+  void opponentHit(OpponentTower opponent) {
+    //alle modstandere med en hvis afstand til projektilet bliver skadede
     for (int i = level.opponentTowers.size()-1; i >= 0; i--) {
       if (dist(x, y, level.opponentTowers.get(i).x, level.opponentTowers.get(i).y) < explosionSize) {
         level.opponentTowers.get(i).health -= damage;
+        
         if (level.opponentTowers.get(i).health <= 0) {
           money += level.opponentTowers.get(i).worth;
           level.opponentTowers.remove(level.opponentTowers.get(i));
